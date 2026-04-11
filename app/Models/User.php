@@ -7,29 +7,15 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-<<<<<<< HEAD
 use Spatie\Permission\Traits\HasRoles; // <-- 1. Agrega esto arriba
 
-=======
-use Laravel\Fortify\TwoFactorAuthenticatable;
-use Laravel\Jetstream\HasProfilePhoto;
-use Laravel\Sanctum\HasApiTokens;
->>>>>>> 592cc40bde63fc932b86934dc637fdfb2059426d
 
 class User extends Authenticatable
 {
     use HasApiTokens;
 
     /** @use HasFactory<UserFactory> */
-<<<<<<< HEAD
     use HasFactory, Notifiable, HasRoles;
-=======
-    use HasFactory;
-
-    use HasProfilePhoto;
-    use Notifiable;
-    use TwoFactorAuthenticatable;
->>>>>>> 592cc40bde63fc932b86934dc637fdfb2059426d
 
     /**
      * The attributes that are mass assignable.
