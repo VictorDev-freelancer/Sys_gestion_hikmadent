@@ -15,6 +15,12 @@
                     <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    
+                    @role('Super usuario')
+                    <x-nav-link href="{{ route('admin.users') }}" :active="request()->routeIs('admin.users')">
+                        {{ __('Control de Personal') }}
+                    </x-nav-link>
+                    @endrole
                 </div>
             </div>
 
@@ -142,6 +148,12 @@
             <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+            
+            @role('Super usuario')
+            <x-responsive-nav-link href="{{ route('admin.users') }}" :active="request()->routeIs('admin.users')">
+                {{ __('Control de Personal') }}
+            </x-responsive-nav-link>
+            @endrole
         </div>
 
         <!-- Responsive Settings Options -->
