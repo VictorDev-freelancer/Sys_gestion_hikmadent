@@ -2,6 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Admin\UserManagement;
+use App\Livewire\WorkOrder\WorkOrderList;
+use App\Livewire\WorkOrder\WorkOrderForm;
+use App\Livewire\WorkOrder\WorkOrderDetail;
+use App\Livewire\Area\AreaDashboard;
 
 Route::get('/', function () {
     return view('welcome');
@@ -20,4 +24,22 @@ Route::middleware([
     Route::get('/usuarios', UserManagement::class)
         ->middleware('role:Super usuario')
         ->name('admin.users');
+
+    // --------------------------------------------------------
+    // ÓRDENES DE TRABAJO
+    // --------------------------------------------------------
+    Route::get('/ordenes', WorkOrderList::class)
+        ->name('work-orders.index');
+
+    Route::get('/ordenes/crear', WorkOrderForm::class)
+        ->name('work-orders.create');
+
+    Route::get('/ordenes/{workOrder}', WorkOrderDetail::class)
+        ->name('work-orders.show');
+
+    // --------------------------------------------------------
+    // DASHBOARD POR ÁREA (acceso por slug)
+    // --------------------------------------------------------
+    Route::get('/area/{slug}', AreaDashboard::class)
+        ->name('area.dashboard');
 });
