@@ -18,6 +18,24 @@ use Livewire\Attributes\Layout;
 #[Layout('layouts.app')]
 class AdminDashboard extends Component
 {
+    public function mount()
+    {
+        $user = auth()->user();
+        
+        // Si no es un rol gerencial, se asume que es un Técnico (aislado)
+        if (!$user->hasAnyRole(['Super usuario', 'Administración'])) {
+            $roleName = $user->roles->first()?->name;
+            if ($roleName) {
+                $area = Area::where('name', $roleName)->first();
+                if ($area) {
+                    return redirect()->route('area.dashboard', $area->slug);
+                }
+            }
+            // Fallback (sin rol reconocido)
+            abort(403, 'No tienes un área operativa asignada o perfil de administrador.');
+        }
+    }
+
     public function render()
     {
         // 1. Métricas Globales

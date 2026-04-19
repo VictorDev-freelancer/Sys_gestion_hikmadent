@@ -18,31 +18,35 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
-    
-    // Dashboard Principal (Admin)
+    // --------------------------------------------------------
+    // Dashboard Principal (Admin) - Se encarga de aislar/redirigir Técnicos.
     Route::get('/dashboard', AdminDashboard::class)
         ->name('dashboard');
 
-    // Módulo de Reportes ETL
-    Route::get('/reportes', Reports::class)
-        ->name('admin.reports');
-
-    // Módulo Exclusivo para Gestión de Usuarios
-    Route::get('/usuarios', UserManagement::class)
-        ->middleware('role:Super usuario')
-        ->name('admin.users');
-
     // --------------------------------------------------------
-    // ÓRDENES DE TRABAJO
+    // CONSOLA GERENCIAL Y ADMINISTRATIVA (Restringida rígidamente)
     // --------------------------------------------------------
-    Route::get('/ordenes', WorkOrderList::class)
-        ->name('work-orders.index');
+    Route::middleware(['role:Super usuario|Administración'])->group(function () {
+        
+        // Módulo de Reportes ETL
+        Route::get('/reportes', Reports::class)
+            ->name('admin.reports');
 
-    Route::get('/ordenes/crear', WorkOrderForm::class)
-        ->name('work-orders.create');
+        // Módulo Exclusivo para Gestión de Usuarios
+        Route::get('/usuarios', UserManagement::class)
+            ->middleware('role:Super usuario') // Este requiere super admin puro
+            ->name('admin.users');
 
-    Route::get('/ordenes/{workOrder}', WorkOrderDetail::class)
-        ->name('work-orders.show');
+        // Órdenes de Trabajo (Listado General)
+        Route::get('/ordenes', WorkOrderList::class)
+            ->name('work-orders.index');
+
+        Route::get('/ordenes/crear', WorkOrderForm::class)
+            ->name('work-orders.create');
+
+        Route::get('/ordenes/{workOrder}', WorkOrderDetail::class)
+            ->name('work-orders.show');
+    });
 
     // --------------------------------------------------------
     // DASHBOARD POR ÁREA (acceso por slug)

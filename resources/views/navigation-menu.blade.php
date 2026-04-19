@@ -12,6 +12,7 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    @hasanyrole('Super usuario|Administración')
                     <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
                         {{ __('Panel Principal') }}
                     </x-nav-link>
@@ -19,10 +20,17 @@
                     <x-nav-link href="{{ route('work-orders.index') }}" :active="request()->routeIs('work-orders.*')">
                         {{ __('Órdenes de Trabajo') }}
                     </x-nav-link>
+                    @endhasanyrole
 
                     {{-- Links dinámicos a áreas según el rol del usuario --}}
                     @php
-                        $userAreas = \App\Models\Area::active()->ordered()->get();
+                        $user = auth()->user();
+                        if ($user->hasAnyRole(['Super usuario', 'Administración'])) {
+                            $userAreas = \App\Models\Area::active()->ordered()->get();
+                        } else {
+                            $roleNames = $user->roles->pluck('name')->toArray();
+                            $userAreas = \App\Models\Area::active()->ordered()->whereIn('name', $roleNames)->get();
+                        }
                     @endphp
                     @foreach($userAreas as $navArea)
                         <x-nav-link href="{{ route('area.dashboard', $navArea->slug) }}" :active="request()->is('area/' . $navArea->slug)">
@@ -159,6 +167,7 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
+            @hasanyrole('Super usuario|Administración')
             <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
                 {{ __('Panel Principal') }}
             </x-responsive-nav-link>
@@ -166,9 +175,16 @@
             <x-responsive-nav-link href="{{ route('work-orders.index') }}" :active="request()->routeIs('work-orders.*')">
                 {{ __('Órdenes de Trabajo') }}
             </x-responsive-nav-link>
+            @endhasanyrole
 
             @php
-                $userAreasResp = \App\Models\Area::active()->ordered()->get();
+                $user = auth()->user();
+                if ($user->hasAnyRole(['Super usuario', 'Administración'])) {
+                    $userAreasResp = \App\Models\Area::active()->ordered()->get();
+                } else {
+                    $roleNames = $user->roles->pluck('name')->toArray();
+                    $userAreasResp = \App\Models\Area::active()->ordered()->whereIn('name', $roleNames)->get();
+                }
             @endphp
             @foreach($userAreasResp as $navAreaR)
                 <x-responsive-nav-link href="{{ route('area.dashboard', $navAreaR->slug) }}" :active="request()->is('area/' . $navAreaR->slug)">

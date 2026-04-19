@@ -31,6 +31,14 @@ class AreaDashboard extends Component
     {
         $this->area = Area::where('slug', $slug)->firstOrFail();
         $this->selectedDate = now()->format('Y-m-d');
+
+        $user = auth()->user();
+        if (!$user->hasAnyRole(['Super usuario', 'Administración'])) {
+            // El usuario es un técnico, verificamos si su rol coincide con esta área
+            if (!$user->hasRole($this->area->name)) {
+                abort(403, 'Aislamiento estricto: No tienes permiso para ver el flujo de trabajo de otra área.');
+            }
+        }
     }
 
     public function setView(string $view): void
