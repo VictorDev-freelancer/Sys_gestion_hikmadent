@@ -3,10 +3,10 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Fortify\TwoFactorAuthenticatable;
@@ -62,5 +62,41 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /* ------------------------------------------------------------------ */
+    /*  RELACIONES CON EL DOMINIO HIKMADENT                                */
+    /* ------------------------------------------------------------------ */
+
+    /**
+     * Órdenes de trabajo creadas por este usuario.
+     */
+    public function createdWorkOrders(): HasMany
+    {
+        return $this->hasMany(\App\Models\WorkOrder::class, 'created_by');
+    }
+
+    /**
+     * Órdenes asignadas como TPD responsable.
+     */
+    public function assignedWorkOrders(): HasMany
+    {
+        return $this->hasMany(\App\Models\WorkOrder::class, 'assigned_tpd_id');
+    }
+
+    /**
+     * Áreas de trabajo asignadas (como técnico).
+     */
+    public function workOrderAreas(): HasMany
+    {
+        return $this->hasMany(\App\Models\WorkOrderArea::class, 'assigned_to');
+    }
+
+    /**
+     * Áreas de trabajo supervisadas (como doctor/supervisor).
+     */
+    public function supervisedAreas(): HasMany
+    {
+        return $this->hasMany(\App\Models\WorkOrderArea::class, 'supervisor_id');
     }
 }
