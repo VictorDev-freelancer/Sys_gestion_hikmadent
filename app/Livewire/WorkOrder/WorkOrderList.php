@@ -11,6 +11,7 @@ use App\Models\Area;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 
 /**
  * Livewire WorkOrderList
@@ -71,6 +72,17 @@ class WorkOrderList extends Component
     {
         $this->reset(['search', 'filterStatus', 'filterArea', 'filterPriority']);
         $this->resetPage();
+    }
+
+    /**
+     * [WEB SOCKETS] Recarga asíncrona cuando cambia el estado de una orden
+     * o se transfiere.
+     */
+    #[On('echo:work-orders,WorkOrderStatusChanged')]
+    #[On('echo:work-orders,WorkOrderTransferred')]
+    public function refreshList(): void
+    {
+        // Simple refresh without full load because Livewire will re-render
     }
 
     public function render()

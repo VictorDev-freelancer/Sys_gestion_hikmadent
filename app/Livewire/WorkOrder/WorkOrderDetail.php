@@ -168,6 +168,27 @@ class WorkOrderDetail extends Component
         ]);
     }
 
+    /**
+     * [WEB SOCKETS] Suscribirse al canal específico de esta orden.
+     */
+    public function getListeners(): array
+    {
+        if (! isset($this->workOrder) || ! $this->workOrder->id) {
+            return [];
+        }
+
+        return [
+            "echo:work-order.{$this->workOrder->id},AreaStageCompleted" => 'refreshDetails',
+            "echo:work-orders,WorkOrderStatusChanged"                   => 'refreshDetails',
+            "echo:work-orders,WorkOrderTransferred"                     => 'refreshDetails',
+        ];
+    }
+
+    public function refreshDetails(): void
+    {
+        $this->refreshWorkOrder();
+    }
+
     public function render()
     {
         return view('livewire.work-order.work-order-detail', [
