@@ -16,6 +16,20 @@
                         {{ __('Panel Principal') }}
                     </x-nav-link>
                     
+                    <x-nav-link href="{{ route('work-orders.index') }}" :active="request()->routeIs('work-orders.*')">
+                        {{ __('Órdenes de Trabajo') }}
+                    </x-nav-link>
+
+                    {{-- Links dinámicos a áreas según el rol del usuario --}}
+                    @php
+                        $userAreas = \App\Models\Area::active()->ordered()->get();
+                    @endphp
+                    @foreach($userAreas as $navArea)
+                        <x-nav-link href="{{ route('area.dashboard', $navArea->slug) }}" :active="request()->is('area/' . $navArea->slug)">
+                            {{ $navArea->name }}
+                        </x-nav-link>
+                    @endforeach
+
                     @role('Super usuario')
                     <x-nav-link href="{{ route('admin.users') }}" :active="request()->routeIs('admin.users')">
                         {{ __('Control de Personal') }}
@@ -149,6 +163,19 @@
                 {{ __('Panel Principal') }}
             </x-responsive-nav-link>
             
+            <x-responsive-nav-link href="{{ route('work-orders.index') }}" :active="request()->routeIs('work-orders.*')">
+                {{ __('Órdenes de Trabajo') }}
+            </x-responsive-nav-link>
+
+            @php
+                $userAreasResp = \App\Models\Area::active()->ordered()->get();
+            @endphp
+            @foreach($userAreasResp as $navAreaR)
+                <x-responsive-nav-link href="{{ route('area.dashboard', $navAreaR->slug) }}" :active="request()->is('area/' . $navAreaR->slug)">
+                    {{ $navAreaR->name }}
+                </x-responsive-nav-link>
+            @endforeach
+
             @role('Super usuario')
             <x-responsive-nav-link href="{{ route('admin.users') }}" :active="request()->routeIs('admin.users')">
                 {{ __('Control de Personal') }}
