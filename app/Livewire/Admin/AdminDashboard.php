@@ -67,8 +67,11 @@ class AdminDashboard extends Component
             ->take(5)
             ->get()
             ->map(function ($item) {
+                // $item->prosthetic_type ya es casteado automáticamente por Laravel a un Enum
                 return [
-                    'label' => \App\Enums\ProstheticType::from($item->prosthetic_type)->label(),
+                    'label' => $item->prosthetic_type instanceof \App\Enums\ProstheticType 
+                                ? $item->prosthetic_type->label() 
+                                : \App\Enums\ProstheticType::from($item->prosthetic_type)->label(),
                     'total' => $item->total,
                 ];
             });
