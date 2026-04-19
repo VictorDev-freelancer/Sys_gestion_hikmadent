@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Admin\UserManagement;
+use App\Livewire\Admin\AdminDashboard;
+use App\Livewire\Admin\Reports;
 use App\Livewire\WorkOrder\WorkOrderList;
 use App\Livewire\WorkOrder\WorkOrderForm;
 use App\Livewire\WorkOrder\WorkOrderDetail;
@@ -16,9 +18,14 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    
+    // Dashboard Principal (Admin)
+    Route::get('/dashboard', AdminDashboard::class)
+        ->name('dashboard');
+
+    // Módulo de Reportes ETL
+    Route::get('/reportes', Reports::class)
+        ->name('admin.reports');
 
     // Módulo Exclusivo para Gestión de Usuarios
     Route::get('/usuarios', UserManagement::class)
