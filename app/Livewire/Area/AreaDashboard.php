@@ -97,6 +97,28 @@ class AreaDashboard extends Component
         ]);
     }
 
+    /**
+     * [WEB SOCKETS] Suscribir a canales dinámicos en base al ID del Área.
+     */
+    public function getListeners(): array
+    {
+        // Se asegura que área esté inicializada
+        if (! isset($this->area) || ! $this->area->id) {
+            return [];
+        }
+
+        return [
+            "echo:area.{$this->area->id},WorkOrderTransferred" => 'refreshDashboard',
+            "echo:area.{$this->area->id},AreaStageCompleted"   => 'refreshDashboard',
+            "echo:work-orders,WorkOrderStatusChanged"          => 'refreshDashboard',
+        ];
+    }
+
+    public function refreshDashboard(): void
+    {
+        // Livewire refresca visualmente al llamar esta función
+    }
+
     public function render()
     {
         $baseQuery = WorkOrderArea::with([
