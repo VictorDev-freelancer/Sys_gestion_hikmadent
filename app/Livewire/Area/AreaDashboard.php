@@ -5,6 +5,7 @@ namespace App\Livewire\Area;
 use App\Enums\KanbanStatus;
 use App\Models\Area;
 use App\Models\WorkOrderArea;
+use App\Models\TraceabilityLog;
 use App\Services\WorkOrderService;
 use Carbon\Carbon;
 use Livewire\Component;
@@ -13,18 +14,18 @@ use Livewire\Attributes\Layout;
 /**
  * Livewire AreaDashboard
  *
- * [SOLID - SRP] Dashboard específico de cada área.
- * Ofrece 4 vistas de calendario + Kanban con historial integrado:
- *   1. Kanban   → Tablero con 4 columnas: Inicio / En Proceso / Finalizado / Historial
- *   2. Mensual  → Grid de calendario mensual real (7 cols × semanas)
- *   3. Semanal  → Grid de 7 días con órdenes por día
- *   4. Diario   → Lista detallada del día con checklist
+ * Dashboard por área con:
+ *   - Fila 1: Kanban (Inicio / En Proceso / Finalizado)
+ *   - Fila 2: Historial de trabajos entregados
+ *   - Tabs: Kanban, Mensual, Semanal, Diario
+ *
+ * Flujo: Tareas al 100% → Finalizado → Confirmar Entrega → Historial
  */
 #[Layout('layouts.app')]
 class AreaDashboard extends Component
 {
     public Area $area;
-    public string $view = 'kanban'; // kanban | monthly | weekly | daily
+    public string $view = 'kanban';
     public ?string $selectedDate = null;
 
     public function mount(string $slug): void
@@ -35,14 +36,12 @@ class AreaDashboard extends Component
         $user = auth()->user();
         if (!$user->hasAnyRole(['Super usuario', 'Administración'])) {
             if (!$user->hasRole($this->area->name)) {
-                abort(403, 'Aislamiento estricto: No tienes permiso para ver el flujo de trabajo de otra área.');
+                abort(403, 'No tienes permiso para ver esta área.');
             }
         }
     }
 
-    /* ================================================================== */
-    /*  ACCIONES DE NAVEGACIÓN                                             */
-    /* ================================================================== */
+    /* ── Navegación ── */
 
     public function setView(string $view): void
     {
@@ -82,9 +81,7 @@ class AreaDashboard extends Component
         $this->view = 'daily';
     }
 
-    /* ================================================================== */
-    /*  ACCIONES DE KANBAN                                                 */
-    /* ================================================================== */
+    /* ── Acciones Kanban ── */
 
     public function toggleStage(int $stageId): void
     {
@@ -108,9 +105,36 @@ class AreaDashboard extends Component
         ]);
     }
 
-    /* ================================================================== */
-    /*  WEBSOCKETS                                                         */
-    /* ================================================================== */
+    /**
+     * Confirmar entrega: mueve la orden al historial.
+     * Se marca como 'delivered' (entregada) y se registra en trazabilidad.
+     */
+    public function confirmDelivery(int $workOrderAreaId): void
+    {
+        $woa = WorkOrderArea::with('workOrder')->findOrFail($workOrderAreaId);
+
+        // Marcar como entregado con timestamp
+        $woa->update([
+            'kanban_status' => 'completed',
+            'completed_at'  => $woa->completed_at ?? now(),
+            'notes'         => trim(($woa->notes ?? '') . ' | Entrega confirmada: ' . now()->format('d/m/Y H:i')),
+        ]);
+
+        // Marcar flag de entrega (usamos el campo notes para distinguir entregados)
+        // El historial muestra los que tienen completed_at y notes con "Entrega confirmada"
+        
+        // Registrar en trazabilidad
+        TraceabilityLog::create([
+            'work_order_id' => $woa->work_order_id,
+            'action'        => 'delivery_confirmed',
+            'from_area_id'  => $this->area->id,
+            'to_area_id'    => null,
+            'performed_by'  => auth()->id(),
+            'details'       => "Entrega confirmada en área: {$this->area->name}",
+        ]);
+    }
+
+    /* ── WebSockets ── */
 
     public function getListeners(): array
     {
@@ -118,17 +142,13 @@ class AreaDashboard extends Component
             return [];
         }
         return [
-            "echo:area.{$this->area->id},WorkOrderTransferred" => 'refreshDashboard',
-            "echo:area.{$this->area->id},AreaStageCompleted"   => 'refreshDashboard',
-            "echo:work-orders,WorkOrderStatusChanged"          => 'refreshDashboard',
+            "echo:area.{$this->area->id},WorkOrderTransferred" => '$refresh',
+            "echo:area.{$this->area->id},AreaStageCompleted"   => '$refresh',
+            "echo:work-orders,WorkOrderStatusChanged"          => '$refresh',
         ];
     }
 
-    public function refreshDashboard(): void {}
-
-    /* ================================================================== */
-    /*  RENDER                                                             */
-    /* ================================================================== */
+    /* ── Render ── */
 
     public function render()
     {
@@ -144,35 +164,37 @@ class AreaDashboard extends Component
         $baseQuery = WorkOrderArea::with($eagerLoads)
             ->where('area_id', $this->area->id);
 
-        /* ── Kanban columns (activos) ── */
+        // Kanban: solo órdenes NO entregadas
         $kanbanItems = [
             'pending'     => (clone $baseQuery)->where('kanban_status', 'pending')->get(),
             'in_progress' => (clone $baseQuery)->where('kanban_status', 'in_progress')->get(),
-            'completed'   => (clone $baseQuery)->where('kanban_status', 'completed')
-                                ->where(function ($q) {
-                                    $q->whereNull('completed_at')
-                                      ->orWhere('completed_at', '>=', now()->subHours(24));
-                                })->get(),
+            'completed'   => (clone $baseQuery)
+                ->where('kanban_status', 'completed')
+                ->where(function ($q) {
+                    $q->whereNull('notes')
+                      ->orWhere('notes', 'not like', '%Entrega confirmada%');
+                })->get(),
         ];
 
-        /* ── Historial: completados hace >24h ── */
+        // Historial: órdenes con entrega confirmada
         $historyItems = (clone $baseQuery)
             ->where('kanban_status', 'completed')
             ->whereNotNull('completed_at')
-            ->where('completed_at', '<', now()->subHours(24))
+            ->where('notes', 'like', '%Entrega confirmada%')
             ->orderByDesc('completed_at')
             ->limit(50)
             ->get();
 
-        /* ── Estadísticas ── */
+        // Estadísticas
         $stats = [
             'total'       => (clone $baseQuery)->count(),
             'pending'     => $kanbanItems['pending']->count(),
             'in_progress' => $kanbanItems['in_progress']->count(),
-            'completed'   => (clone $baseQuery)->where('kanban_status', 'completed')->count(),
+            'completed'   => $kanbanItems['completed']->count(),
+            'delivered'   => $historyItems->count(),
         ];
 
-        /* ── Calendario ── */
+        // Calendario
         $monthGrid   = $this->view === 'monthly' ? $this->buildMonthGrid(clone $baseQuery) : [];
         $weekGrid    = $this->view === 'weekly'  ? $this->buildWeekGrid(clone $baseQuery)  : [];
         $daySchedule = $this->view === 'daily'   ? $this->buildDaySchedule(clone $baseQuery) : collect();
@@ -187,9 +209,7 @@ class AreaDashboard extends Component
         ]);
     }
 
-    /* ================================================================== */
-    /*  BUILDERS DE CALENDARIO                                             */
-    /* ================================================================== */
+    /* ── Calendario Mensual ── */
 
     private function buildMonthGrid($query): array
     {
@@ -199,19 +219,14 @@ class AreaDashboard extends Component
         $gridStart  = $monthStart->copy()->startOfWeek(Carbon::MONDAY);
         $gridEnd    = $monthEnd->copy()->endOfWeek(Carbon::SUNDAY);
 
-        $items = (clone $query)
-            ->where(function ($q) use ($gridStart, $gridEnd) {
-                $q->whereBetween('started_at', [$gridStart, $gridEnd])
-                  ->orWhere(function ($q2) use ($gridStart, $gridEnd) {
-                      $q2->whereNull('started_at')
-                         ->whereBetween('created_at', [$gridStart, $gridEnd]);
-                  });
-            })->get();
+        $items = (clone $query)->where(function ($q) use ($gridStart, $gridEnd) {
+            $q->whereBetween('started_at', [$gridStart, $gridEnd])
+              ->orWhere(fn($q2) => $q2->whereNull('started_at')->whereBetween('created_at', [$gridStart, $gridEnd]));
+        })->get();
 
-        $itemsByDate = [];
+        $byDate = [];
         foreach ($items as $item) {
-            $key = ($item->started_at ?? $item->created_at)->format('Y-m-d');
-            $itemsByDate[$key][] = $item;
+            $byDate[($item->started_at ?? $item->created_at)->format('Y-m-d')][] = $item;
         }
 
         $weeks = [];
@@ -219,12 +234,10 @@ class AreaDashboard extends Component
         while ($cursor <= $gridEnd) {
             $week = [];
             for ($d = 0; $d < 7; $d++) {
-                $dayKey = $cursor->format('Y-m-d');
+                $key = $cursor->format('Y-m-d');
                 $week[] = [
-                    'date'    => $cursor->copy(),
-                    'inMonth' => $cursor->month === $monthStart->month,
-                    'isToday' => $cursor->isToday(),
-                    'items'   => $itemsByDate[$dayKey] ?? [],
+                    'date' => $cursor->copy(), 'inMonth' => $cursor->month === $monthStart->month,
+                    'isToday' => $cursor->isToday(), 'items' => $byDate[$key] ?? [],
                 ];
                 $cursor->addDay();
             }
@@ -233,51 +246,42 @@ class AreaDashboard extends Component
         return $weeks;
     }
 
+    /* ── Calendario Semanal ── */
+
     private function buildWeekGrid($query): array
     {
         $date = Carbon::parse($this->selectedDate);
-        $weekStart = $date->copy()->startOfWeek(Carbon::MONDAY);
-        $weekEnd   = $date->copy()->endOfWeek(Carbon::SUNDAY);
+        $start = $date->copy()->startOfWeek(Carbon::MONDAY);
+        $end   = $date->copy()->endOfWeek(Carbon::SUNDAY);
 
-        $items = (clone $query)
-            ->where(function ($q) use ($weekStart, $weekEnd) {
-                $q->whereBetween('started_at', [$weekStart, $weekEnd])
-                  ->orWhere(function ($q2) use ($weekStart, $weekEnd) {
-                      $q2->whereNull('started_at')
-                         ->whereBetween('created_at', [$weekStart, $weekEnd]);
-                  });
-            })->get();
+        $items = (clone $query)->where(function ($q) use ($start, $end) {
+            $q->whereBetween('started_at', [$start, $end])
+              ->orWhere(fn($q2) => $q2->whereNull('started_at')->whereBetween('created_at', [$start, $end]));
+        })->get();
 
-        $itemsByDate = [];
+        $byDate = [];
         foreach ($items as $item) {
-            $key = ($item->started_at ?? $item->created_at)->format('Y-m-d');
-            $itemsByDate[$key][] = $item;
+            $byDate[($item->started_at ?? $item->created_at)->format('Y-m-d')][] = $item;
         }
 
         $days = [];
-        $cursor = $weekStart->copy();
+        $cursor = $start->copy();
         for ($d = 0; $d < 7; $d++) {
-            $dayKey = $cursor->format('Y-m-d');
-            $days[] = [
-                'date'    => $cursor->copy(),
-                'isToday' => $cursor->isToday(),
-                'items'   => $itemsByDate[$dayKey] ?? [],
-            ];
+            $key = $cursor->format('Y-m-d');
+            $days[] = ['date' => $cursor->copy(), 'isToday' => $cursor->isToday(), 'items' => $byDate[$key] ?? []];
             $cursor->addDay();
         }
         return $days;
     }
 
+    /* ── Calendario Diario ── */
+
     private function buildDaySchedule($query)
     {
         $date = Carbon::parse($this->selectedDate);
-        return (clone $query)
-            ->where(function ($q) use ($date) {
-                $q->whereDate('started_at', $date)
-                  ->orWhere(function ($q2) use ($date) {
-                      $q2->whereNull('started_at')
-                         ->whereDate('created_at', $date);
-                  });
-            })->get();
+        return (clone $query)->where(function ($q) use ($date) {
+            $q->whereDate('started_at', $date)
+              ->orWhere(fn($q2) => $q2->whereNull('started_at')->whereDate('created_at', $date));
+        })->get();
     }
 }
