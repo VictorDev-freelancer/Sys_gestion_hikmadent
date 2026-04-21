@@ -140,36 +140,32 @@
                 margin: 0 auto;
             }
 
-            /* ─── Logo Section ─── */
-            .logo-container {
-                position: relative;
+            /* ─── Typographic Logo ─── */
+            .brand-logo {
                 margin-bottom: 2.5rem;
                 animation: fadeSlideUp 1s ease-out;
+                text-align: center;
             }
 
-            .logo-glow {
-                position: absolute;
-                inset: -20%;
-                background: radial-gradient(circle, var(--hk-accent-glow), transparent 70%);
-                border-radius: 50%;
-                animation: pulseGlow 4s ease-in-out infinite;
-                z-index: -1;
+            .brand-logo .brand-name {
+                font-family: 'Outfit', sans-serif;
+                font-size: 2.8rem;
+                font-weight: 800;
+                letter-spacing: 0.06em;
+                background: linear-gradient(135deg, #ffffff, var(--hk-accent));
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                line-height: 1;
             }
 
-            .logo-container img {
-                width: 280px;
-                height: auto;
-                filter: drop-shadow(0 0 30px rgba(50, 184, 212, 0.2));
-                transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-            }
-
-            .logo-container:hover img {
-                transform: scale(1.04);
-            }
-
-            @keyframes pulseGlow {
-                0%, 100% { opacity: 0.4; transform: scale(1); }
-                50%      { opacity: 0.7; transform: scale(1.1); }
+            .brand-logo .brand-tagline {
+                font-size: 0.7rem;
+                font-weight: 500;
+                text-transform: uppercase;
+                letter-spacing: 0.25em;
+                color: var(--hk-text-muted);
+                margin-top: 0.4rem;
             }
 
             /* ─── Glass Card ─── */
@@ -549,10 +545,10 @@
         <!-- ═══ Main Content ═══ -->
         <div class="welcome-wrapper">
 
-            <!-- Logo -->
-            <div class="logo-container">
-                <div class="logo-glow"></div>
-                <img src="{{ asset('logo.png') }}" alt="HIKMADENT — Centro Técnico Odontológico">
+            <!-- Brand Logo -->
+            <div class="brand-logo">
+                <div class="brand-name">HIKMADENT</div>
+                <div class="brand-tagline">Centro Técnico Odontológico</div>
             </div>
 
             <!-- Glass Card -->
