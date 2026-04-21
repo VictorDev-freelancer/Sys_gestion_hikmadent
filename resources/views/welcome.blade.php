@@ -602,13 +602,6 @@
                                 <span class="btn-icon">🔐</span>
                                 Iniciar Sesión
                             </a>
-
-                            @if (Route::has('register'))
-                                <a href="{{ route('register') }}" class="btn btn--ghost" id="btn-register">
-                                    <span class="btn-icon">📝</span>
-                                    Crear Cuenta
-                                </a>
-                            @endif
                         @endauth
                     </div>
                 @endif
