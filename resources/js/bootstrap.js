@@ -4,9 +4,13 @@ window.axios = axios;
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
 /**
- * Echo exposes an expressive API for subscribing to channels and listening
- * for events that are broadcast by Laravel. Echo and event broadcasting
- * allow your team to quickly build robust real-time web applications.
+ * Echo / Reverb — WebSockets
+ *
+ * Desactivado temporalmente. Para activar Reverb:
+ * 1. Asegúrate que las variables VITE_REVERB_* en .env tengan valores correctos
+ * 2. Ejecuta `php artisan reverb:start` en el servidor
+ * 3. Descomenta la línea de abajo
+ * 4. Ejecuta `npm run build` para recompilar
  */
 
-import './echo';
+// import './echo';
