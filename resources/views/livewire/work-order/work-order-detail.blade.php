@@ -184,23 +184,29 @@
                                 <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200"></div>
                                 @forelse($workOrder->traceabilityLogs as $log)
                                     <div class="relative pl-10 pb-4">
-                                        <div class="absolute left-2.5 w-3 h-3 rounded-full bg-indigo-500 border-2 border-white shadow"></div>
-                                        <div class="bg-gray-50 rounded-lg p-3">
-                                            <div class="flex justify-between items-start">
+                                        <div class="absolute left-2.5 w-3 h-3 rounded-full {{ $log->result_state['css']['dot'] }} border-2 border-white shadow"></div>
+                                        <div class="{{ $log->result_state['css']['bg'] }} border {{ $log->result_state['css']['border'] }} rounded-lg p-3 transition-colors duration-300">
+                                            <div class="flex justify-between items-start mb-1">
                                                 <div>
-                                                    <span class="font-medium text-sm text-gray-800">{{ $log->action_label }}</span>
+                                                    <span class="font-bold text-sm text-gray-800">{{ $log->action_label }}</span>
                                                     @if($log->toArea)
                                                         <span class="font-bold text-sm text-gray-700"> -> {{ $log->toArea->name }}</span>
                                                     @elseif($log->fromArea)
                                                         <span class="font-bold text-sm text-gray-700"> -> {{ $log->fromArea->name }}</span>
                                                     @endif
                                                 </div>
-                                                <span class="text-xs text-gray-400">{{ $log->created_at->format('d/m/Y H:i') }}</span>
+                                                <span class="text-xs text-gray-500 font-medium whitespace-nowrap">{{ $log->created_at->format('d/m/Y - H:i') }}</span>
                                             </div>
-                                            <div class="text-xs mt-1 text-gray-700">
-                                                Por: <span class="font-bold">{{ $log->performer->name ?? 'Sistema' }}</span>
-                                                @if($log->notes)
-                                                    <span class="text-gray-400 block mt-0.5 whitespace-pre-wrap">— {{ $log->notes }}</span>
+                                            <div class="text-sm mt-1 text-gray-800 space-y-1">
+                                                <div><span class="text-gray-600">Por:</span> <span class="font-bold">{{ $log->performer->name ?? 'Sistema' }}</span></div>
+                                                <div class="flex items-center mt-1">
+                                                    <span class="text-gray-600 mr-2">Estado:</span> 
+                                                    <span class="font-bold {{ $log->result_state['css']['text'] }} px-2 py-0.5 {{ $log->result_state['css']['badge_bg'] }} rounded text-xs uppercase tracking-wider">
+                                                        {{ $log->result_state['label'] }}
+                                                    </span>
+                                                </div>
+                                                @if($log->notes && $log->action !== 'kanban_moved')
+                                                    <div class="text-gray-500 italic mt-1.5 text-xs">Nota: {{ $log->notes }}</div>
                                                 @endif
                                             </div>
                                         </div>

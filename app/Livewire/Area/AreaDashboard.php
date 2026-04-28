@@ -98,7 +98,7 @@ class AreaDashboard extends Component
     public function moveToKanbanColumn(int $workOrderAreaId, string $newStatus): void
     {
         $woa = WorkOrderArea::findOrFail($workOrderAreaId);
-        $oldKanbanStatus = $woa->kanban_status->label();
+        $oldKanbanStatusValue = $woa->kanban_status->value;
 
         $woa->update([
             'kanban_status' => $newStatus,
@@ -106,17 +106,15 @@ class AreaDashboard extends Component
             'completed_at'  => $newStatus === 'completed' ? now() : null,
         ]);
 
-        $newKanbanStatusLabel = $woa->fresh()->kanban_status->label();
-
         TraceabilityLog::create([
             'work_order_id' => $woa->work_order_id,
             'action'        => 'kanban_moved',
             'from_area_id'  => $this->area->id,
             'to_area_id'    => $this->area->id,
             'performed_by'  => auth()->id(),
-            'notes'         => "De {$oldKanbanStatus} a {$newKanbanStatusLabel}",
-            'from_status'   => $woa->workOrder->status->value,
-            'to_status'     => $woa->workOrder->status->value,
+            'notes'         => "Movimiento dentro del tablero",
+            'from_status'   => $oldKanbanStatusValue,
+            'to_status'     => $newStatus,
         ]);
     }
 
