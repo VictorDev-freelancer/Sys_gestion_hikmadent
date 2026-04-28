@@ -67,11 +67,13 @@
                             <h3 class="text-sm font-bold text-white uppercase tracking-wider">Acciones</h3>
                         </div>
                         <div class="p-4 space-y-2">
+                            @hasanyrole('Super usuario|Administración')
                             @if($workOrder->status->value === 'draft')
                                 <button wire:click="registerOrder" class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition">
                                     Registrar Orden
                                 </button>
                             @endif
+                            @endhasanyrole
 
                             @if(in_array($workOrder->status->value, ['registered', 'in_progress']))
                                 <button wire:click="openTransferModal" class="w-full px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition">
@@ -79,6 +81,7 @@
                                 </button>
                             @endif
 
+                            @hasanyrole('Super usuario|Administración')
                             @if($workOrder->status->value === 'in_progress')
                                 <button wire:click="completeOrder" class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition" onclick="confirm('¿Confirmar que la orden está completada?') || event.stopImmediatePropagation()">
                                     Marcar Completada
@@ -96,10 +99,17 @@
                                     Cancelar Orden
                                 </button>
                             @endif
+                            @endhasanyrole
 
+                            @hasanyrole('Super usuario|Administración')
                             <a href="{{ route('work-orders.index') }}" class="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium text-center block hover:bg-gray-50 transition" wire:navigate>
                                 Volver al Listado
                             </a>
+                            @else
+                            <button onclick="window.history.back()" class="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium transition hover:bg-gray-50">
+                                ← Volver
+                            </button>
+                            @endhasanyrole
                         </div>
                     </div>
                 </div>

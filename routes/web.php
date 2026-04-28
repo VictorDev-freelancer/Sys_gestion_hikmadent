@@ -43,10 +43,13 @@ Route::middleware([
 
         Route::get('/ordenes/crear', WorkOrderForm::class)
             ->name('work-orders.create');
-
-        Route::get('/ordenes/{workOrder}', WorkOrderDetail::class)
-            ->name('work-orders.show');
     });
+
+    // --------------------------------------------------------
+    // DETALLE DE ORDEN (Accesible para todos los roles para transferencias)
+    // --------------------------------------------------------
+    Route::get('/ordenes/{workOrder}', WorkOrderDetail::class)
+        ->name('work-orders.show');
 
     // --------------------------------------------------------
     // DASHBOARD POR ÁREA (acceso por slug)
