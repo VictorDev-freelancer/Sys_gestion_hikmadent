@@ -245,7 +245,21 @@ class WorkOrderService
      */
     public function complete(WorkOrder $workOrder): WorkOrder
     {
-        return $this->transitionTo($workOrder, WorkOrderStatus::COMPLETED);
+        $order = $this->transitionTo($workOrder, WorkOrderStatus::COMPLETED);
+
+        // Forzar a Completado las áreas activas que sigan pendientes
+        $activeAreas = $workOrder->workOrderAreas()
+            ->where('kanban_status', '!=', 'completed')
+            ->get();
+
+        foreach ($activeAreas as $woa) {
+            $woa->update([
+                'kanban_status' => 'completed',
+                'completed_at'  => now(),
+            ]);
+        }
+
+        return $order;
     }
 
     /**
@@ -255,12 +269,28 @@ class WorkOrderService
     {
         $order = $this->transitionTo($workOrder, WorkOrderStatus::DELIVERED);
 
+        // Confirmar entrega en el Kanban del área activa para que pase a su historial
+        $activeAreas = $workOrder->workOrderAreas()
+            ->where(function ($q) {
+                $q->whereNull('notes')
+                  ->orWhere('notes', 'not like', '%Entrega confirmada%');
+            })
+            ->get();
+
+        foreach ($activeAreas as $woa) {
+            $woa->update([
+                'kanban_status' => 'completed',
+                'completed_at'  => $woa->completed_at ?? now(),
+                'notes'         => trim(($woa->notes ?? '') . ' | Entrega confirmada: ' . now()->format('d/m/Y H:i')),
+            ]);
+        }
+
         TraceabilityLog::create([
             'work_order_id' => $workOrder->id,
             'from_area_id'  => $workOrder->current_area_id,
             'to_area_id'    => null,
             'performed_by'  => Auth::id() ?? $workOrder->created_by,
-            'action'        => TraceabilityLog::ACTION_DELIVERED,
+            'action'        => TraceabilityLog::ACTION_DELIVERY_CONFIRMED,
             'from_status'   => 'completed',
             'to_status'     => 'delivered',
             'notes'         => 'Orden entregada al cliente',
