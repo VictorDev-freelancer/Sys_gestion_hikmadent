@@ -188,18 +188,17 @@
                                         <div class="bg-gray-50 rounded-lg p-3">
                                             <div class="flex justify-between items-start">
                                                 <div>
-                                                    <span class="font-medium text-sm text-gray-800">Acción: {{ $log->action_label }}</span>
-                                                    @if($log->fromArea)
-                                                        <span class="text-xs text-gray-500 ml-1">de {{ $log->fromArea->name }}</span>
-                                                    @endif
+                                                    <span class="font-medium text-sm text-gray-800">{{ $log->action_label }}</span>
                                                     @if($log->toArea)
-                                                        <span class="text-xs text-gray-500 ml-1">→ {{ $log->toArea->name }}</span>
+                                                        <span class="font-bold text-sm text-gray-700"> -> {{ $log->toArea->name }}</span>
+                                                    @elseif($log->fromArea)
+                                                        <span class="font-bold text-sm text-gray-700"> -> {{ $log->fromArea->name }}</span>
                                                     @endif
                                                 </div>
                                                 <span class="text-xs text-gray-400">{{ $log->created_at->format('d/m/Y H:i') }}</span>
                                             </div>
-                                            <div class="text-xs mt-1">
-                                                <span class="text-gray-500">Usuario que modificó:</span> <span class="font-bold text-gray-700">{{ $log->performer->name ?? 'Sistema' }}</span>
+                                            <div class="text-xs mt-1 text-gray-700">
+                                                Por: <span class="font-bold">{{ $log->performer->name ?? 'Sistema' }}</span>
                                                 @if($log->notes)
                                                     <span class="text-gray-400 block mt-0.5 whitespace-pre-wrap">— {{ $log->notes }}</span>
                                                 @endif
