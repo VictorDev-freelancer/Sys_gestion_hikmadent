@@ -39,13 +39,13 @@
     {{-- Botones Kanban --}}
     <div class="mt-3 pt-2 flex justify-between" style="border-top:1px solid #e5e7eb">
         @if($status !== 'pending')
-            <button wire:click="moveToKanbanColumn({{ $woa->id }}, 'pending')" class="text-xs font-medium transition" style="color:#2563eb">← Inicio</button>
+            <button wire:click="moveToKanbanColumn({{ $woa->id }}, 'pending')" class="text-xs font-medium transition" style="color:#2563eb">← Asignado</button>
         @else <span></span> @endif
         @if($status !== 'in_progress')
-            <button wire:click="moveToKanbanColumn({{ $woa->id }}, 'in_progress')" class="text-xs font-medium transition" style="color:#d97706">En Proceso</button>
+            <button wire:click="moveToKanbanColumn({{ $woa->id }}, 'in_progress')" class="text-xs font-medium transition" style="color:#d97706">En desarrollo</button>
         @endif
         @if($status !== 'completed')
-            <button wire:click="moveToKanbanColumn({{ $woa->id }}, 'completed')" class="text-xs font-medium transition" style="color:#059669">Finalizar →</button>
+            <button wire:click="moveToKanbanColumn({{ $woa->id }}, 'completed')" class="text-xs font-medium transition" style="color:#059669">Completar →</button>
         @else <span></span> @endif
     </div>
 </div>

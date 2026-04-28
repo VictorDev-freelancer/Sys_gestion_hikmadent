@@ -6,7 +6,7 @@ namespace App\Enums;
  * Enum KanbanStatus
  *
  * Representa las 3 columnas del tablero Kanban (CANVA)
- * especificadas en el prompt: Inicio, En Proceso, Finalizado.
+ * especificadas en el prompt: Asignado, En desarrollo, Completado.
  */
 enum KanbanStatus: string
 {
@@ -17,9 +17,9 @@ enum KanbanStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::PENDING     => 'Inicio',
-            self::IN_PROGRESS => 'En Proceso',
-            self::COMPLETED   => 'Finalizado',
+            self::PENDING     => 'Asignado',
+            self::IN_PROGRESS => 'En desarrollo',
+            self::COMPLETED   => 'Completado',
         };
     }
 

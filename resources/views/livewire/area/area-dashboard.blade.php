@@ -36,15 +36,15 @@
                     <p class="text-2xl font-bold text-gray-900 mt-1">{{ $stats['total'] }}</p>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition" style="border-left:4px solid #3b82f6">
-                    <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Inicio</p>
+                    <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Asignado</p>
                     <p class="text-2xl font-bold mt-1" style="color:#2563eb">{{ $stats['pending'] }}</p>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition" style="border-left:4px solid #f59e0b">
-                    <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">En Proceso</p>
+                    <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">En desarrollo</p>
                     <p class="text-2xl font-bold mt-1" style="color:#d97706">{{ $stats['in_progress'] }}</p>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition" style="border-left:4px solid #10b981">
-                    <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Finalizado</p>
+                    <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Completado</p>
                     <p class="text-2xl font-bold mt-1" style="color:#059669">{{ $stats['completed'] }}</p>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition" style="border-left:4px solid #8b5cf6">
@@ -61,11 +61,11 @@
             {{-- FILA 1: Kanban — 3 columnas --}}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
 
-                {{-- INICIO --}}
+                {{-- ASIGNADO --}}
                 <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
                     <div class="px-4 py-3 border-b" style="background:#eff6ff">
                         <h3 class="font-bold text-sm flex items-center gap-2" style="color:#1e40af">
-                            🔵 Inicio
+                            🔵 Asignado
                             <span class="ml-auto text-xs font-bold px-2 py-0.5 rounded-full" style="background:#bfdbfe;color:#1e40af">{{ $kanbanItems['pending']->count() }}</span>
                         </h3>
                     </div>
@@ -78,11 +78,11 @@
                     </div>
                 </div>
 
-                {{-- EN PROCESO --}}
+                {{-- EN DESARROLLO --}}
                 <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
                     <div class="px-4 py-3 border-b" style="background:#fffbeb">
                         <h3 class="font-bold text-sm flex items-center gap-2" style="color:#92400e">
-                            🟡 En Proceso
+                            🟡 En desarrollo
                             <span class="ml-auto text-xs font-bold px-2 py-0.5 rounded-full" style="background:#fde68a;color:#92400e">{{ $kanbanItems['in_progress']->count() }}</span>
                         </h3>
                     </div>
@@ -95,11 +95,11 @@
                     </div>
                 </div>
 
-                {{-- FINALIZADO --}}
+                {{-- COMPLETADO --}}
                 <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
                     <div class="px-4 py-3 border-b" style="background:#ecfdf5">
                         <h3 class="font-bold text-sm flex items-center gap-2" style="color:#065f46">
-                            🟢 Finalizado
+                            🟢 Completado
                             <span class="ml-auto text-xs font-bold px-2 py-0.5 rounded-full" style="background:#a7f3d0;color:#065f46">{{ $kanbanItems['completed']->count() }}</span>
                         </h3>
                     </div>
