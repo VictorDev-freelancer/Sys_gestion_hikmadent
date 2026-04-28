@@ -175,6 +175,61 @@
 
                 </div>
             </div>
+
+            {{-- Fila 3: Historial Global de Trabajos Realizados --}}
+            <div class="bg-white rounded-lg shadow-xl overflow-hidden mt-6">
+                <div class="px-6 py-4 flex items-center justify-between" style="background:#f5f3ff; border-bottom:1px solid #e5e7eb">
+                    <h3 class="font-bold text-base flex items-center gap-2" style="color:#5b21b6">
+                        📜 Historial Global de Trabajos Realizados
+                    </h3>
+                    <span class="text-xs font-bold px-3 py-1 rounded-full" style="background:#ddd6fe;color:#5b21b6">Últimas 50 entregas de todas las áreas</span>
+                </div>
+
+                @if($globalHistoryItems->count())
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y" style="border-color:#e5e7eb">
+                        <thead>
+                            <tr style="background:#faf5ff">
+                                <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider" style="color:#6b7280">Código OT</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider" style="color:#6b7280">Área</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider" style="color:#6b7280">Paciente</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider" style="color:#6b7280">Doctor</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider" style="color:#6b7280">Responsable</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider" style="color:#6b7280">Inicio de Trabajo</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider" style="color:#6b7280">Confirmación de Entrega</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider" style="color:#6b7280">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y" style="border-color:#f3f4f6">
+                            @foreach($globalHistoryItems as $woa)
+                            <tr class="hover:bg-gray-50 transition">
+                                <td class="px-4 py-3">
+                                    <a href="{{ route('work-orders.show', $woa->workOrder) }}" class="font-mono text-sm font-bold block" style="color:#4f46e5" wire:navigate>{{ $woa->workOrder->code }}</a>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="px-2 py-0.5 rounded text-xs font-bold border" style="background:{{ $woa->area->color }}15; border-color:{{ $woa->area->color }}50; color:{{ $woa->area->color }}">{{ $woa->area->name }}</span>
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-800">{{ $woa->workOrder->patient_name }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">Dr. {{ $woa->workOrder->doctor_name }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">{{ $woa->assignedUser?->name ?? '—' }}</td>
+                                <td class="px-4 py-3 text-xs text-gray-500">{{ $woa->started_at ? $woa->started_at->format('d/m/Y H:i') : '—' }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-800 font-bold bg-green-50/30">{{ $woa->completed_at ? $woa->completed_at->format('d/m/Y H:i') : '—' }}</td>
+                                <td class="px-4 py-3">
+                                    <span class="px-2 py-1 flex items-center justify-center w-max rounded-full text-xs font-bold" style="background:#d1fae5;color:#065f46">✅ Finalizado</span>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                @else
+                <div class="text-center py-12 text-gray-300 border-t">
+                    <p class="text-4xl mb-3">📋</p>
+                    <p class="text-lg font-medium">Sin entregas globales registradas</p>
+                </div>
+                @endif
+            </div>
+            
         </div>
     </div>
 </div>

@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\WorkOrder;
+use App\Models\WorkOrderArea;
 use App\Models\Area;
 use App\Models\TraceabilityLog;
 use Illuminate\Support\Facades\DB;
@@ -87,6 +88,13 @@ class AdminDashboard extends Component
             'recentLogs'     => TraceabilityLog::with(['workOrder', 'performer', 'fromArea', 'toArea'])
                                 ->latest()
                                 ->take(10)
+                                ->get(),
+            'globalHistoryItems' => WorkOrderArea::with(['workOrder', 'area', 'assignedUser'])
+                                ->where('kanban_status', 'completed')
+                                ->whereNotNull('completed_at')
+                                ->where('notes', 'like', '%Entrega confirmada%')
+                                ->orderByDesc('completed_at')
+                                ->take(50)
                                 ->get(),
         ]);
     }
