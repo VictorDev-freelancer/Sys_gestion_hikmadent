@@ -154,7 +154,7 @@ class WorkOrder extends Model
      */
     public function workOrderAreas(): HasMany
     {
-        return $this->hasMany(WorkOrderArea::class)->orderBy('created_at');
+        return $this->hasMany(WorkOrderArea::class)->orderByDesc('created_at');
     }
 
     /**

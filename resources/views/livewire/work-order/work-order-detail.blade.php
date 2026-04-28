@@ -120,7 +120,7 @@
                     {{-- Recorrido por Áreas (Checklist) --}}
                     <div class="bg-white shadow-xl rounded-lg overflow-hidden">
                         <div class="bg-violet-600 px-4 py-3">
-                            <h3 class="text-sm font-bold text-white uppercase tracking-wider">Recorrido por Áreas — Checklist</h3>
+                            <h3 class="text-sm font-bold text-white uppercase tracking-wider">Recorrido por Áreas — Checklist (Más reciente arriba)</h3>
                         </div>
                         <div class="p-4">
                             @forelse($workOrder->workOrderAreas as $woa)
@@ -188,7 +188,7 @@
                                         <div class="bg-gray-50 rounded-lg p-3">
                                             <div class="flex justify-between items-start">
                                                 <div>
-                                                    <span class="font-medium text-sm text-gray-800">{{ $log->action_label }}</span>
+                                                    <span class="font-medium text-sm text-gray-800">Acción: {{ $log->action_label }}</span>
                                                     @if($log->fromArea)
                                                         <span class="text-xs text-gray-500 ml-1">de {{ $log->fromArea->name }}</span>
                                                     @endif
@@ -198,10 +198,10 @@
                                                 </div>
                                                 <span class="text-xs text-gray-400">{{ $log->created_at->format('d/m/Y H:i') }}</span>
                                             </div>
-                                            <div class="text-xs text-gray-500 mt-1">
-                                                Por: {{ $log->performer->name ?? 'Sistema' }}
+                                            <div class="text-xs mt-1">
+                                                <span class="text-gray-500">Usuario que modificó:</span> <span class="font-bold text-gray-700">{{ $log->performer->name ?? 'Sistema' }}</span>
                                                 @if($log->notes)
-                                                    — {{ $log->notes }}
+                                                    <span class="text-gray-400 block mt-0.5 whitespace-pre-wrap">— {{ $log->notes }}</span>
                                                 @endif
                                             </div>
                                         </div>
