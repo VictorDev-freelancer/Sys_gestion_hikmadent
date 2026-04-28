@@ -94,17 +94,23 @@ class TraceabilityLog extends Model
      */
     public function getActionLabelAttribute(): string
     {
+        if ($this->action === self::ACTION_KANBAN_MOVED) {
+            if ($this->to_status === 'in_progress' || str_contains($this->to_status, 'Desarrollo')) return 'Mover a En desarrollo';
+            if ($this->to_status === 'completed' || str_contains($this->to_status, 'Completado')) return 'Marcar completada';
+            if ($this->to_status === 'pending' || str_contains($this->to_status, 'Asignado')) return 'Mover a Asignado';
+            return 'Movimiento en Kanban';
+        }
+
         return match ($this->action) {
-            self::ACTION_CREATED       => 'Orden creada',
-            self::ACTION_ASSIGNED      => 'Asignada a área',
-            self::ACTION_TRANSFERRED   => 'Transferida entre áreas',
+            self::ACTION_CREATED       => 'Creación de orden',
+            self::ACTION_ASSIGNED      => 'Asignación de tarea',
+            self::ACTION_TRANSFERRED   => 'Transferencia de área',
             self::ACTION_COMPLETED     => 'Área completada',
             self::ACTION_RETURNED      => 'Devuelta a área anterior',
             self::ACTION_DELIVERED     => 'Entregada al cliente',
             self::ACTION_CANCELLED     => 'Cancelada',
             self::ACTION_STATUS_CHANGE => 'Cambio de estado',
-            self::ACTION_KANBAN_MOVED  => 'Movimiento en Kanban',
-            self::ACTION_DELIVERY_CONFIRMED => 'Entrega de área confirmada',
+            self::ACTION_DELIVERY_CONFIRMED => 'Confirmar entrega',
             default                    => $this->action,
         };
     }
