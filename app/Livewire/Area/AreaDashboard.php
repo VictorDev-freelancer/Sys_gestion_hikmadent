@@ -98,10 +98,25 @@ class AreaDashboard extends Component
     public function moveToKanbanColumn(int $workOrderAreaId, string $newStatus): void
     {
         $woa = WorkOrderArea::findOrFail($workOrderAreaId);
+        $oldKanbanStatus = $woa->kanban_status->label();
+
         $woa->update([
             'kanban_status' => $newStatus,
             'started_at'    => $newStatus !== 'pending' && !$woa->started_at ? now() : $woa->started_at,
             'completed_at'  => $newStatus === 'completed' ? now() : null,
+        ]);
+
+        $newKanbanStatusLabel = $woa->fresh()->kanban_status->label();
+
+        TraceabilityLog::create([
+            'work_order_id' => $woa->work_order_id,
+            'action'        => 'kanban_moved',
+            'from_area_id'  => $this->area->id,
+            'to_area_id'    => $this->area->id,
+            'performed_by'  => auth()->id(),
+            'notes'         => "De {$oldKanbanStatus} a {$newKanbanStatusLabel}",
+            'from_status'   => $woa->workOrder->status->value,
+            'to_status'     => $woa->workOrder->status->value,
         ]);
     }
 
@@ -120,17 +135,16 @@ class AreaDashboard extends Component
             'notes'         => trim(($woa->notes ?? '') . ' | Entrega confirmada: ' . now()->format('d/m/Y H:i')),
         ]);
 
-        // Marcar flag de entrega (usamos el campo notes para distinguir entregados)
-        // El historial muestra los que tienen completed_at y notes con "Entrega confirmada"
-        
         // Registrar en trazabilidad
         TraceabilityLog::create([
             'work_order_id' => $woa->work_order_id,
             'action'        => 'delivery_confirmed',
             'from_area_id'  => $this->area->id,
-            'to_area_id'    => null,
+            'to_area_id'    => $this->area->id,
             'performed_by'  => auth()->id(),
-            'details'       => "Entrega confirmada en área: {$this->area->name}",
+            'notes'         => "Confirmación de entrega de trabajos finalizados.",
+            'from_status'   => $woa->workOrder->status->value,
+            'to_status'     => $woa->workOrder->status->value,
         ]);
     }
 

@@ -58,6 +58,8 @@ class TraceabilityLog extends Model
     public const ACTION_DELIVERED    = 'delivered';
     public const ACTION_CANCELLED    = 'cancelled';
     public const ACTION_STATUS_CHANGE = 'status_changed';
+    public const ACTION_KANBAN_MOVED  = 'kanban_moved';
+    public const ACTION_DELIVERY_CONFIRMED = 'delivery_confirmed';
 
     /* ------------------------------------------------------------------ */
     /*  RELACIONES                                                         */
@@ -101,6 +103,8 @@ class TraceabilityLog extends Model
             self::ACTION_DELIVERED     => 'Entregada al cliente',
             self::ACTION_CANCELLED     => 'Cancelada',
             self::ACTION_STATUS_CHANGE => 'Cambio de estado',
+            self::ACTION_KANBAN_MOVED  => 'Movimiento en Kanban',
+            self::ACTION_DELIVERY_CONFIRMED => 'Entrega de área confirmada',
             default                    => $this->action,
         };
     }
