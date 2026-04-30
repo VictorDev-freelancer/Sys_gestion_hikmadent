@@ -83,10 +83,10 @@
                                         <p class="text-xs text-gray-400">{{ $mov->productVariant->product->name }}</p>
                                     </td>
                                     <td class="px-4 py-3 text-right font-bold text-sm {{ $mov->movement_type->isIncoming() ? 'text-green-600' : 'text-red-600' }}">
-                                        {{ $mov->movement_type->isIncoming() ? '+' : '-' }}{{ $mov->quantity }}
+                                        {{ $mov->movement_type->isIncoming() ? '+' : '-' }}{{ intval($mov->quantity) }}
                                     </td>
-                                    <td class="px-4 py-3 text-right text-sm text-gray-500">{{ $mov->stock_before }}</td>
-                                    <td class="px-4 py-3 text-right text-sm text-gray-700 font-bold">{{ $mov->stock_after }}</td>
+                                    <td class="px-4 py-3 text-right text-sm text-gray-500">{{ intval($mov->stock_before) }}</td>
+                                    <td class="px-4 py-3 text-right text-sm text-gray-700 font-bold">{{ intval($mov->stock_after) }}</td>
                                     <td class="px-4 py-3 text-right text-sm text-gray-500">{{ $mov->unit_cost ? 'S/ ' . number_format($mov->unit_cost, 2) : '—' }}</td>
                                     <td class="px-4 py-3 text-xs text-gray-500">{{ $mov->supplier?->name ?? '—' }}</td>
                                     <td class="px-4 py-3 text-xs text-gray-500">{{ $mov->performer->name ?? 'Sistema' }}</td>
@@ -122,7 +122,7 @@
                     <select wire:model="selectedVariantId" class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
                         <option value="">Seleccionar variante...</option>
                         @foreach($variants as $var)
-                            <option value="{{ $var->id }}">{{ $var->sku }} — {{ $var->product->name }} — {{ $var->variant_name }} (Stock: {{ $var->current_stock }})</option>
+                            <option value="{{ $var->id }}">{{ $var->sku }} — {{ $var->product->name }} — {{ $var->variant_name }} (Stock: {{ intval($var->current_stock) }})</option>
                         @endforeach
                     </select>
                     @error('selectedVariantId') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
@@ -131,7 +131,7 @@
                 {{-- Cantidad --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad *</label>
-                    <input type="number" step="0.01" min="0.01" wire:model="movementQuantity" class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                    <input type="number" step="1" min="1" wire:model="movementQuantity" class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
                     @error('movementQuantity') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                 </div>
 

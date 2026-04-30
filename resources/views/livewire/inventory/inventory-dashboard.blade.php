@@ -75,8 +75,8 @@
                                             <p class="text-sm text-gray-700">{{ $item->product->name }} — {{ $item->variant_name }}</p>
                                         </div>
                                         <div class="text-right">
-                                            <span class="text-lg font-bold text-red-600">{{ $item->current_stock }}</span>
-                                            <p class="text-xs text-gray-400">Mín: {{ $item->effective_minimum_stock }}</p>
+                                            <span class="text-lg font-bold text-red-600">{{ intval($item->current_stock) }}</span>
+                                            <p class="text-xs text-gray-400">Mín: {{ intval($item->effective_minimum_stock) }}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -106,7 +106,7 @@
                                             <span class="text-sm font-bold {{ $item->is_expired ? 'text-red-600' : 'text-amber-600' }}">
                                                 {{ $item->expires_at->format('d/m/Y') }}
                                             </span>
-                                            <p class="text-xs text-gray-400">Stock: {{ $item->current_stock }}</p>
+                                            <p class="text-xs text-gray-400">Stock: {{ intval($item->current_stock) }}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -181,9 +181,9 @@
                                                 <p class="text-xs text-gray-500">{{ $mov->productVariant->variant_name }}</p>
                                             </td>
                                             <td class="px-4 py-3 text-right font-bold text-sm {{ $mov->movement_type->isIncoming() ? 'text-green-600' : 'text-red-600' }}">
-                                                {{ $mov->movement_type->isIncoming() ? '+' : '-' }}{{ $mov->quantity }}
+                                                {{ $mov->movement_type->isIncoming() ? '+' : '-' }}{{ intval($mov->quantity) }}
                                             </td>
-                                            <td class="px-4 py-3 text-right text-sm text-gray-700">{{ $mov->stock_after }}</td>
+                                            <td class="px-4 py-3 text-right text-sm text-gray-700">{{ intval($mov->stock_after) }}</td>
                                             <td class="px-4 py-3 text-xs text-gray-500">{{ $mov->performer->name ?? 'Sistema' }}</td>
                                         </tr>
                                     @empty

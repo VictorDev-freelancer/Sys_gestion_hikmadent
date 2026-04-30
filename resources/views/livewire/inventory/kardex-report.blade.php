@@ -50,7 +50,7 @@
                         <div class="flex items-center gap-6">
                             <div class="text-center">
                                 <p class="text-xs text-gray-500 uppercase">Stock Actual</p>
-                                <p class="text-2xl font-bold {{ $selectedVariant->is_low_stock ? 'text-red-600' : 'text-gray-900' }}">{{ $selectedVariant->current_stock }}</p>
+                                <p class="text-2xl font-bold {{ $selectedVariant->is_low_stock ? 'text-red-600' : 'text-gray-900' }}">{{ intval($selectedVariant->current_stock) }}</p>
                             </div>
                             <div class="text-center">
                                 <p class="text-xs text-gray-500 uppercase">Costo Prom.</p>
@@ -58,7 +58,7 @@
                             </div>
                             <div class="text-center">
                                 <p class="text-xs text-gray-500 uppercase">Valor Total</p>
-                                <p class="text-lg font-bold text-green-600">S/ {{ number_format($selectedVariant->current_stock * ($selectedVariant->cost_price ?? 0), 2) }}</p>
+                                <p class="text-lg font-bold text-green-600">S/ {{ number_format(intval($selectedVariant->current_stock) * ($selectedVariant->cost_price ?? 0), 2) }}</p>
                             </div>
                             <button wire:click="reconcile" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded-lg text-xs transition">🔍 Reconciliar</button>
                         </div>
@@ -125,9 +125,9 @@
                                     <td class="px-4 py-3 text-xs text-gray-600 whitespace-nowrap">{{ $mov->movement_date->format('d/m/Y H:i') }}</td>
                                     <td class="px-4 py-3"><span class="px-2 py-0.5 rounded text-xs font-bold {{ $colors['bg'] }} {{ $colors['text'] }}">{{ $mov->movement_type->label() }}</span></td>
                                     <td class="px-4 py-3 text-xs text-gray-600">{{ $mov->reason->label() }}</td>
-                                    <td class="px-4 py-3 text-right font-bold text-sm text-green-600">{{ $isIn ? $mov->quantity : '' }}</td>
-                                    <td class="px-4 py-3 text-right font-bold text-sm text-red-600">{{ !$isIn ? $mov->quantity : '' }}</td>
-                                    <td class="px-4 py-3 text-right font-bold text-sm text-gray-900 bg-gray-100/50">{{ $mov->stock_after }}</td>
+                                    <td class="px-4 py-3 text-right font-bold text-sm text-green-600">{{ $isIn ? intval($mov->quantity) : '' }}</td>
+                                    <td class="px-4 py-3 text-right font-bold text-sm text-red-600">{{ !$isIn ? intval($mov->quantity) : '' }}</td>
+                                    <td class="px-4 py-3 text-right font-bold text-sm text-gray-900 bg-gray-100/50">{{ intval($mov->stock_after) }}</td>
                                     <td class="px-4 py-3 text-right text-sm text-gray-500">{{ $mov->unit_cost ? 'S/ ' . number_format($mov->unit_cost, 2) : '—' }}</td>
                                     <td class="px-4 py-3 text-xs text-gray-500">{{ $mov->supplier?->name ?? '—' }}</td>
                                     <td class="px-4 py-3 text-xs text-gray-500">{{ $mov->performer->name ?? 'Sistema' }}</td>

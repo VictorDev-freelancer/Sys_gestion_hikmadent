@@ -67,10 +67,10 @@
                                     <td class="px-4 py-3 text-center">
                                         <span class="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded-full">{{ $prod->variants->count() }}</span>
                                     </td>
-                                    <td class="px-4 py-3 text-right text-sm text-amber-600 font-medium">{{ number_format($prod->minimum_stock, 2) }}</td>
-                                    @php $stockTotal = $prod->variants->sum('current_stock'); @endphp
+                                    <td class="px-4 py-3 text-right text-sm text-amber-600 font-medium">{{ intval($prod->minimum_stock) }}</td>
+                                    @php $stockTotal = (int) $prod->variants->sum('current_stock'); @endphp
                                     <td class="px-4 py-3 text-right font-bold text-sm {{ $stockTotal <= $prod->minimum_stock ? 'text-red-600' : 'text-green-600' }}">
-                                        {{ number_format($stockTotal, 2) }}
+                                        {{ $stockTotal }}
                                         @if($stockTotal <= $prod->minimum_stock && $prod->minimum_stock > 0) <span class="text-xs">⚠️</span> @endif
                                     </td>
                                     <td class="px-4 py-3 text-center">
@@ -101,10 +101,10 @@
                                             @if($var->cost_price) S/ {{ number_format($var->cost_price, 2) }} @else — @endif
                                         </td>
                                         <td class="px-4 py-2 text-right text-xs text-amber-600">
-                                            {{ $var->minimum_stock !== null ? number_format($var->minimum_stock, 2) : '—' }}
+                                            {{ $var->minimum_stock !== null ? intval($var->minimum_stock) : '—' }}
                                         </td>
                                         <td class="px-4 py-2 text-right font-bold text-sm {{ $var->is_low_stock ? 'text-red-600' : 'text-gray-700' }}">
-                                            {{ number_format($var->current_stock, 2) }}
+                                            {{ intval($var->current_stock) }}
                                             @if($var->is_low_stock) <span class="text-xs text-red-400">⚠️</span> @endif
                                         </td>
                                         <td class="px-4 py-2 text-center">
@@ -291,7 +291,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Stock Mínimo</label>
-                        <input type="number" step="0.01" min="0" wire:model="productMinimumStock" class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                        <input type="number" step="1" min="0" wire:model="productMinimumStock" class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
                 </div>
                 <div>
@@ -348,7 +348,7 @@
                 <div class="grid grid-cols-3 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Stock Mínimo</label>
-                        <input type="number" step="0.01" min="0" wire:model="variantMinimumStock" class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                        <input type="number" step="1" min="0" wire:model="variantMinimumStock" class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Costo Unit. (S/)</label>
