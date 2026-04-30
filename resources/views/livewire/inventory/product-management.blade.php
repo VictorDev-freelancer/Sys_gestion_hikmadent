@@ -50,7 +50,8 @@
                                 <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Producto</th>
                                 <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Categoría</th>
                                 <th class="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase">Variantes</th>
-                                <th class="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase">Stock Total</th>
+                                <th class="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase">Stock Mín.</th>
+                                <th class="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase">Stock Actual</th>
                                 <th class="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase">Acciones</th>
                             </tr>
                         </thead>
@@ -66,7 +67,12 @@
                                     <td class="px-4 py-3 text-center">
                                         <span class="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded-full">{{ $prod->variants->count() }}</span>
                                     </td>
-                                    <td class="px-4 py-3 text-right font-bold text-sm text-gray-900">{{ number_format($prod->variants->sum('current_stock'), 2) }}</td>
+                                    <td class="px-4 py-3 text-right text-sm text-amber-600 font-medium">{{ number_format($prod->minimum_stock, 2) }}</td>
+                                    @php $stockTotal = $prod->variants->sum('current_stock'); @endphp
+                                    <td class="px-4 py-3 text-right font-bold text-sm {{ $stockTotal <= $prod->minimum_stock ? 'text-red-600' : 'text-green-600' }}">
+                                        {{ number_format($stockTotal, 2) }}
+                                        @if($stockTotal <= $prod->minimum_stock && $prod->minimum_stock > 0) <span class="text-xs">⚠️</span> @endif
+                                    </td>
                                     <td class="px-4 py-3 text-center">
                                         <div class="flex justify-center gap-1">
                                             <button wire:click="openVariantModal(null, {{ $prod->id }})" class="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded hover:bg-emerald-200 transition font-bold">+ Variante</button>
@@ -94,8 +100,11 @@
                                         <td class="px-4 py-2 text-center text-xs text-gray-400">
                                             @if($var->cost_price) S/ {{ number_format($var->cost_price, 2) }} @else — @endif
                                         </td>
+                                        <td class="px-4 py-2 text-right text-xs text-amber-600">
+                                            {{ $var->minimum_stock !== null ? number_format($var->minimum_stock, 2) : '—' }}
+                                        </td>
                                         <td class="px-4 py-2 text-right font-bold text-sm {{ $var->is_low_stock ? 'text-red-600' : 'text-gray-700' }}">
-                                            {{ $var->current_stock }}
+                                            {{ number_format($var->current_stock, 2) }}
                                             @if($var->is_low_stock) <span class="text-xs text-red-400">⚠️</span> @endif
                                         </td>
                                         <td class="px-4 py-2 text-center">
@@ -107,7 +116,7 @@
                                     </tr>
                                 @endforeach
                             @empty
-                                <tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">No hay productos registrados.</td></tr>
+                                <tr><td colspan="7" class="px-4 py-8 text-center text-gray-400">No hay productos registrados.</td></tr>
                             @endforelse
                         </tbody>
                     </table>
