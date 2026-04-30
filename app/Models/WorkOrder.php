@@ -173,6 +173,14 @@ class WorkOrder extends Model
         return $this->morphMany(AuditLog::class, 'auditable');
     }
 
+    /**
+     * Insumos consumidos del inventario para esta orden.
+     */
+    public function consumptions(): HasMany
+    {
+        return $this->hasMany(WorkOrderConsumption::class);
+    }
+
     /* ------------------------------------------------------------------ */
     /*  HELPERS                                                            */
     /* ------------------------------------------------------------------ */

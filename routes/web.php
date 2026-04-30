@@ -8,6 +8,10 @@ use App\Livewire\WorkOrder\WorkOrderList;
 use App\Livewire\WorkOrder\WorkOrderForm;
 use App\Livewire\WorkOrder\WorkOrderDetail;
 use App\Livewire\Area\AreaDashboard;
+use App\Livewire\Inventory\InventoryDashboard;
+use App\Livewire\Inventory\ProductManagement;
+use App\Livewire\Inventory\StockMovements;
+use App\Livewire\Inventory\KardexReport;
 
 Route::get('/', function () {
     return view('welcome');
@@ -43,6 +47,20 @@ Route::middleware([
 
         Route::get('/ordenes/crear', WorkOrderForm::class)
             ->name('work-orders.create');
+
+        // --------------------------------------------------------
+        // MÓDULO DE INVENTARIO (Solo Admin y Super usuario)
+        // --------------------------------------------------------
+        Route::prefix('inventario')->group(function () {
+            Route::get('/', InventoryDashboard::class)
+                ->name('inventory.dashboard');
+            Route::get('/productos', ProductManagement::class)
+                ->name('inventory.products');
+            Route::get('/movimientos', StockMovements::class)
+                ->name('inventory.movements');
+            Route::get('/kardex', KardexReport::class)
+                ->name('inventory.kardex');
+        });
     });
 
     // --------------------------------------------------------

@@ -20,6 +20,10 @@
                     <x-nav-link href="{{ route('work-orders.index') }}" :active="request()->routeIs('work-orders.*')">
                         {{ __('Órdenes de Trabajo') }}
                     </x-nav-link>
+
+                    <x-nav-link href="{{ route('inventory.dashboard') }}" :active="request()->routeIs('inventory.*')">
+                        📦 {{ __('Inventario') }}
+                    </x-nav-link>
                     @endhasanyrole
 
                     {{-- Links dinámicos a áreas según el rol del usuario --}}
@@ -174,6 +178,10 @@
             
             <x-responsive-nav-link href="{{ route('work-orders.index') }}" :active="request()->routeIs('work-orders.*')">
                 {{ __('Órdenes de Trabajo') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link href="{{ route('inventory.dashboard') }}" :active="request()->routeIs('inventory.*')">
+                📦 {{ __('Inventario') }}
             </x-responsive-nav-link>
             @endhasanyrole
 
