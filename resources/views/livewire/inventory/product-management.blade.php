@@ -66,7 +66,7 @@
                                     <td class="px-4 py-3 text-center">
                                         <span class="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded-full">{{ $prod->variants->count() }}</span>
                                     </td>
-                                    <td class="px-4 py-3 text-right font-bold text-sm text-gray-900">{{ $prod->total_stock }}</td>
+                                    <td class="px-4 py-3 text-right font-bold text-sm text-gray-900">{{ number_format($prod->variants->sum('current_stock'), 2) }}</td>
                                     <td class="px-4 py-3 text-center">
                                         <div class="flex justify-center gap-1">
                                             <button wire:click="openVariantModal(null, {{ $prod->id }})" class="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded hover:bg-emerald-200 transition font-bold">+ Variante</button>
@@ -282,7 +282,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Stock Mínimo</label>
-                        <input type="number" step="0.01" wire:model="productMinimumStock" class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                        <input type="number" step="0.01" min="0" wire:model="productMinimumStock" class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
                 </div>
                 <div>
@@ -339,11 +339,11 @@
                 <div class="grid grid-cols-3 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Stock Mínimo</label>
-                        <input type="number" step="0.01" wire:model="variantMinimumStock" class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                        <input type="number" step="0.01" min="0" wire:model="variantMinimumStock" class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Costo Unit. (S/)</label>
-                        <input type="number" step="0.01" wire:model="variantCostPrice" class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                        <input type="number" step="0.01" min="0" wire:model="variantCostPrice" class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Vencimiento</label>
