@@ -200,7 +200,7 @@
                     </div>
                 </div>
                 <div class="p-4" wire:ignore>
-                    <div id="area-calendar" x-data="fullcalendar(@js($calendarEvents))"></div>
+                    <div id="area-calendar" data-events='@json($calendarEvents)'></div>
                 </div>
             </div>
 

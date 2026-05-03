@@ -49,12 +49,17 @@
         @livewireScripts
 
         <script>
-            document.addEventListener('alpine:init', () => {
-                Alpine.data('fullcalendar', (eventsData) => ({
-                    calendar: null,
-                    tooltip: null,
-                    init() {
-                        this.calendar = new FullCalendar.Calendar(this.$el, {
+            // Pure JS implementation that is immune to Livewire/Alpine loading errors
+            (function() {
+                var tooltips = {};
+
+                function renderCalendar(id) {
+                    var el = document.getElementById(id);
+                    if (el && el.dataset.init !== '1') {
+                        el.dataset.init = '1';
+                        var eventsData = JSON.parse(el.getAttribute('data-events') || '[]');
+                        
+                        var cal = new FullCalendar.Calendar(el, {
                             initialView: 'dayGridMonth',
                             locale: 'es',
                             firstDay: 1,
@@ -64,21 +69,21 @@
                             buttonText: { today: 'Hoy', month: 'Mensual', week: 'Semanal', day: 'Diario' },
                             dayMaxEvents: 3,
                             moreLinkText: function(n) { return '+' + n + ' más'; },
-                            eventDidMount: (info) => {
-                                info.el.addEventListener('mouseenter', () => {
+                            eventDidMount: function(info) {
+                                info.el.addEventListener('mouseenter', function() {
                                     var p = info.event.extendedProps;
-                                    this.tooltip = document.createElement('div');
-                                    this.tooltip.className = 'fc-event-tooltip';
-                                    this.tooltip.style.position = 'fixed';
-                                    this.tooltip.style.zIndex = '9999';
-                                    this.tooltip.style.background = 'white';
-                                    this.tooltip.style.border = '1px solid #e5e7eb';
-                                    this.tooltip.style.borderRadius = '12px';
-                                    this.tooltip.style.padding = '14px 16px';
-                                    this.tooltip.style.boxShadow = '0 20px 25px -5px rgba(0,0,0,0.12)';
-                                    this.tooltip.style.pointerEvents = 'none';
-                                    this.tooltip.style.minWidth = '240px';
-                                    this.tooltip.style.maxWidth = '300px';
+                                    var tt = document.createElement('div');
+                                    tt.className = 'fc-event-tooltip';
+                                    tt.style.position = 'fixed';
+                                    tt.style.zIndex = '9999';
+                                    tt.style.background = 'white';
+                                    tt.style.border = '1px solid #e5e7eb';
+                                    tt.style.borderRadius = '12px';
+                                    tt.style.padding = '14px 16px';
+                                    tt.style.boxShadow = '0 20px 25px -5px rgba(0,0,0,0.12)';
+                                    tt.style.pointerEvents = 'none';
+                                    tt.style.minWidth = '240px';
+                                    tt.style.maxWidth = '300px';
 
                                     var html = '<b style="color:#4f46e5">' + p.code + '</b>';
                                     if (p.isDelayed) html += ' <span style="color:red;font-size:11px">⚠️ RETRASADA</span>';
@@ -90,34 +95,44 @@
                                     if (p.deliveryDate) html += '<br>Entrega: ' + p.deliveryDate;
                                     html += '</small>';
 
-                                    this.tooltip.innerHTML = html;
-                                    document.body.appendChild(this.tooltip);
+                                    tt.innerHTML = html;
+                                    document.body.appendChild(tt);
+                                    tooltips[info.event.id || p.code] = tt;
                                     
                                     var r = info.el.getBoundingClientRect();
-                                    this.tooltip.style.top = (r.bottom + 8) + 'px';
-                                    this.tooltip.style.left = Math.min(r.left, window.innerWidth - 320) + 'px';
+                                    tt.style.top = (r.bottom + 8) + 'px';
+                                    tt.style.left = Math.min(r.left, window.innerWidth - 320) + 'px';
                                 });
-                                info.el.addEventListener('mouseleave', () => {
-                                    if (this.tooltip) { this.tooltip.remove(); this.tooltip = null; }
+                                info.el.addEventListener('mouseleave', function() {
+                                    var p = info.event.extendedProps;
+                                    var tt = tooltips[info.event.id || p.code];
+                                    if (tt) { tt.remove(); delete tooltips[info.event.id || p.code]; }
                                 });
                             },
                             eventClick: function(info) { 
                                 info.jsEvent.preventDefault(); 
-                                if(info.event.url) Livewire.navigate(info.event.url); 
+                                if(info.event.url) window.location.href = info.event.url; // Fallback to normal navigation if Livewire is dead
                             },
                         });
-                        this.calendar.render();
-                    },
-                    destroy() {
-                        if (this.calendar) {
-                            this.calendar.destroy();
-                        }
-                        if (this.tooltip) {
-                            this.tooltip.remove();
-                        }
+                        cal.render();
                     }
-                }));
-            });
+                }
+
+                // Continuously watch for calendar elements appearing in the DOM
+                setInterval(function() {
+                    if (typeof FullCalendar !== 'undefined') {
+                        renderCalendar('admin-calendar');
+                        renderCalendar('area-calendar');
+                    }
+                }, 200);
+
+                // Clean up orphaned tooltips on scroll
+                window.addEventListener('scroll', function() {
+                    var els = document.querySelectorAll('.fc-event-tooltip');
+                    els.forEach(function(el) { el.remove(); });
+                    tooltips = {};
+                }, true);
+            })();
         </script>
     </body>
 </html>

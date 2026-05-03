@@ -65,7 +65,7 @@
                     </div>
                 </div>
                 <div class="p-4" wire:ignore>
-                    <div id="admin-calendar" x-data="fullcalendar(@js($calendarEvents))"></div>
+                    <div id="admin-calendar" data-events='@json($calendarEvents)'></div>
                 </div>
             </div>
 
