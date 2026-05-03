@@ -5,7 +5,14 @@
                 <div class="w-4 h-4 rounded-full" style="background-color: {{ $area->color }}"></div>
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ $area->name }}</h2>
             </div>
-            <div class="flex flex-wrap gap-1">
+        </div>
+    </x-slot>
+
+    <div class="py-6">
+        <div class="max-w-full mx-auto sm:px-6 lg:px-8">
+
+            {{-- Botones de vista (dentro del componente Livewire) --}}
+            <div class="flex justify-end mb-4 gap-1">
                 <button wire:click="setView('kanban')" class="px-3 py-1.5 rounded-lg text-sm font-medium transition"
                     style="{{ $view === 'kanban' ? 'background:#4f46e5;color:white;' : 'background:#f3f4f6;color:#4b5563;' }}">
                     📋 Kanban
@@ -15,11 +22,6 @@
                     📅 Calendario
                 </button>
             </div>
-        </div>
-    </x-slot>
-
-    <div class="py-6">
-        <div class="max-w-full mx-auto sm:px-6 lg:px-8">
 
             {{-- ═══ ESTADÍSTICAS ═══ --}}
             <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
