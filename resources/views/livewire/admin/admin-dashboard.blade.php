@@ -4,12 +4,14 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Dashboard Administrativo') }}
             </h2>
-            <a href="{{ route('admin.reports') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg flex items-center transition duration-150 ease-in-out" wire:navigate>
-                <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Exportar Reporte ETL
-            </a>
+            <div class="flex items-center gap-3">
+                <a href="{{ route('admin.reports') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg flex items-center transition duration-150 ease-in-out" wire:navigate>
+                    <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Exportar Reporte ETL
+                </a>
+            </div>
         </div>
     </x-slot>
 
@@ -43,6 +45,29 @@
                     <div class="flex items-center mt-2">
                         <span class="text-3xl font-bold text-green-600">{{ $completed }}</span>
                     </div>
+                </div>
+            </div>
+
+            {{-- ═══ FULLCALENDAR — Calendario de Órdenes Pendientes ═══ --}}
+            <div class="bg-white rounded-xl shadow-xl overflow-hidden">
+                <div class="px-6 py-4 flex items-center justify-between" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);border-bottom:2px solid #4338ca">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">📅</span>
+                        <div>
+                            <h3 class="font-bold text-white text-lg">Calendario de Órdenes Pendientes</h3>
+                            <p class="text-indigo-200 text-xs">Vista global de todas las OTs activas por fecha de entrega</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-2 text-xs text-white/80">
+                            <span class="w-3 h-3 rounded-full inline-block" style="background:#3b82f6"></span> Registrada
+                            <span class="w-3 h-3 rounded-full inline-block ml-2" style="background:#f59e0b"></span> En Proceso
+                            <span class="w-3 h-3 rounded-full inline-block ml-2" style="background:#ef4444"></span> Retrasada
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4" id="fullcalendar-container" wire:ignore>
+                    <div id="admin-calendar"></div>
                 </div>
             </div>
 
@@ -233,3 +258,213 @@
         </div>
     </div>
 </div>
+
+{{-- FullCalendar CDN --}}
+@push('scripts')
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+
+<style>
+    /* ── Estilos premium para FullCalendar ── */
+    #admin-calendar .fc {
+        font-family: 'Figtree', ui-sans-serif, system-ui, sans-serif;
+    }
+    #admin-calendar .fc-toolbar-title {
+        font-size: 1.25rem !important;
+        font-weight: 700 !important;
+        color: #1f2937 !important;
+        text-transform: capitalize;
+    }
+    #admin-calendar .fc-button {
+        background: #4f46e5 !important;
+        border-color: #4338ca !important;
+        font-weight: 600 !important;
+        font-size: 0.8rem !important;
+        padding: 6px 14px !important;
+        border-radius: 8px !important;
+        transition: all 0.15s !important;
+        text-transform: capitalize !important;
+    }
+    #admin-calendar .fc-button:hover {
+        background: #4338ca !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px -1px rgba(79,70,229,0.3) !important;
+    }
+    #admin-calendar .fc-button-active {
+        background: #3730a3 !important;
+        border-color: #312e81 !important;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.15) !important;
+    }
+    #admin-calendar .fc-today-button {
+        background: #059669 !important;
+        border-color: #047857 !important;
+    }
+    #admin-calendar .fc-today-button:hover {
+        background: #047857 !important;
+    }
+    #admin-calendar .fc-day-today {
+        background: #eff6ff !important;
+    }
+    #admin-calendar .fc-daygrid-day-number {
+        font-weight: 600;
+        color: #374151;
+        padding: 6px 10px !important;
+    }
+    #admin-calendar .fc-day-today .fc-daygrid-day-number {
+        background: #4f46e5;
+        color: white;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    #admin-calendar .fc-event {
+        border-radius: 6px !important;
+        padding: 2px 6px !important;
+        font-size: 0.72rem !important;
+        font-weight: 600 !important;
+        cursor: pointer !important;
+        border-width: 2px !important;
+        transition: transform 0.1s, box-shadow 0.1s !important;
+    }
+    #admin-calendar .fc-event:hover {
+        transform: scale(1.02);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+        z-index: 10 !important;
+    }
+    #admin-calendar .fc-col-header-cell {
+        background: #f9fafb;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        font-size: 0.7rem !important;
+        color: #6b7280 !important;
+        padding: 10px 0 !important;
+    }
+    #admin-calendar .fc-timegrid-slot {
+        height: 48px !important;
+    }
+    #admin-calendar .fc-popover {
+        border-radius: 12px !important;
+        box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15) !important;
+        border: 1px solid #e5e7eb !important;
+    }
+    #admin-calendar .fc-popover-header {
+        background: #4f46e5 !important;
+        color: white !important;
+        border-radius: 12px 12px 0 0 !important;
+        font-weight: 700 !important;
+        padding: 8px 12px !important;
+    }
+    /* Tooltip personalizado */
+    .fc-event-tooltip {
+        position: fixed;
+        z-index: 9999;
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 14px 16px;
+        box-shadow: 0 20px 25px -5px rgba(0,0,0,0.12), 0 8px 10px -6px rgba(0,0,0,0.06);
+        pointer-events: none;
+        min-width: 240px;
+        max-width: 300px;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const calendarEl = document.getElementById('admin-calendar');
+    if (!calendarEl) return;
+
+    const events = @json($calendarEvents);
+    let tooltipEl = null;
+
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'es',
+        firstDay: 1,
+        height: 'auto',
+        events: events,
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        buttonText: {
+            today: 'Hoy',
+            month: '📅 Mensual',
+            week: '📆 Semanal',
+            day: '🕐 Diario'
+        },
+        dayMaxEvents: 3,
+        moreLinkText: function(num) {
+            return '+' + num + ' más';
+        },
+        eventDidMount: function(info) {
+            // Tooltip al hover
+            info.el.addEventListener('mouseenter', function(e) {
+                const props = info.event.extendedProps;
+                tooltipEl = document.createElement('div');
+                tooltipEl.className = 'fc-event-tooltip';
+                tooltipEl.innerHTML = `
+                    <div style="margin-bottom:8px">
+                        <span style="font-family:monospace;font-weight:800;color:#4f46e5;font-size:0.9rem">${props.code}</span>
+                        ${props.isDelayed ? '<span style="background:#fee2e2;color:#991b1b;font-size:0.65rem;font-weight:700;padding:2px 6px;border-radius:9999px;margin-left:6px">⚠️ RETRASADA</span>' : ''}
+                    </div>
+                    <div style="display:grid;gap:4px;font-size:0.78rem">
+                        <div style="display:flex;justify-content:space-between">
+                            <span style="color:#9ca3af">Paciente</span>
+                            <span style="color:#1f2937;font-weight:600">${props.patient || '—'}</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between">
+                            <span style="color:#9ca3af">Doctor</span>
+                            <span style="color:#1f2937;font-weight:600">Dr. ${props.doctor || '—'}</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;align-items:center">
+                            <span style="color:#9ca3af">Área</span>
+                            <span style="background:${props.areaColor}20;color:${props.areaColor};font-weight:700;padding:1px 8px;border-radius:6px;font-size:0.7rem;border:1px solid ${props.areaColor}40">${props.area}</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between">
+                            <span style="color:#9ca3af">Estado</span>
+                            <span style="font-weight:600;color:#374151">${props.status}</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between">
+                            <span style="color:#9ca3af">Prioridad</span>
+                            <span style="font-weight:600;color:${props.priorityVal === 'urgent' ? '#dc2626' : '#374151'}">${props.priority}</span>
+                        </div>
+                        ${props.deliveryDate ? `<div style="display:flex;justify-content:space-between;padding-top:4px;border-top:1px solid #f3f4f6"><span style="color:#9ca3af">Entrega</span><span style="font-weight:700;color:${props.isDelayed ? '#dc2626' : '#059669'}">${props.deliveryDate}</span></div>` : ''}
+                    </div>
+                `;
+                document.body.appendChild(tooltipEl);
+
+                const rect = info.el.getBoundingClientRect();
+                tooltipEl.style.top = (rect.bottom + 8) + 'px';
+                tooltipEl.style.left = Math.min(rect.left, window.innerWidth - 320) + 'px';
+            });
+
+            info.el.addEventListener('mouseleave', function() {
+                if (tooltipEl) {
+                    tooltipEl.remove();
+                    tooltipEl = null;
+                }
+            });
+        },
+        eventClick: function(info) {
+            info.jsEvent.preventDefault();
+            if (info.event.url) {
+                Livewire.navigate(info.event.url);
+            }
+        },
+        noEventsText: 'Sin órdenes pendientes para este periodo',
+    });
+
+    calendar.render();
+
+    // Limpiar tooltip al scroll
+    window.addEventListener('scroll', function() {
+        if (tooltipEl) { tooltipEl.remove(); tooltipEl = null; }
+    }, true);
+});
+</script>
+@endpush
