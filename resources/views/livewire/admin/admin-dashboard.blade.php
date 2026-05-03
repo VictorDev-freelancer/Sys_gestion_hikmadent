@@ -276,19 +276,8 @@
 
 @script
 <script>
-    function loadFC(cb) {
-        if (typeof FullCalendar !== 'undefined') { cb(); return; }
-        var l = document.createElement('link'); l.rel = 'stylesheet';
-        l.href = 'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css';
-        document.head.appendChild(l);
-        var s = document.createElement('script');
-        s.src = 'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js';
-        s.onload = cb; document.head.appendChild(s);
-    }
-
-    function initAdminCalendar() {
-        var el = document.getElementById('admin-calendar');
-        if (!el || el.dataset.init === '1') return;
+    var el = document.getElementById('admin-calendar');
+    if (el && !el.dataset.init) {
         el.dataset.init = '1';
         var events = JSON.parse(el.getAttribute('data-events') || '[]');
         var tt = null;
@@ -313,7 +302,6 @@
         });
         c.render();
     }
-
-    loadFC(initAdminCalendar);
 </script>
 @endscript
+

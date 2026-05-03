@@ -227,20 +227,9 @@
 
 @script
 <script>
-    // Función para cargar FullCalendar CDN
-    function loadFC(cb) {
-        if (typeof FullCalendar !== 'undefined') { cb(); return; }
-        var l = document.createElement('link'); l.rel = 'stylesheet';
-        l.href = 'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css';
-        document.head.appendChild(l);
-        var s = document.createElement('script');
-        s.src = 'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js';
-        s.onload = cb; document.head.appendChild(s);
-    }
-
-    function initAreaCalendar() {
-        var el = document.getElementById('area-calendar');
-        if (!el || el.dataset.init === '1') return;
+    // Inicializar calendario si el div existe
+    var el = document.getElementById('area-calendar');
+    if (el && !el.dataset.init) {
         el.dataset.init = '1';
         var events = JSON.parse(el.getAttribute('data-events') || '[]');
         var tt = null;
@@ -266,12 +255,37 @@
         cal.render();
     }
 
-    // Intentar inicializar al cargar
-    loadFC(initAreaCalendar);
-
-    // Re-intentar después de cada actualización de Livewire
-    Livewire.hook('morph.updated', () => {
-        setTimeout(function() { loadFC(initAreaCalendar); }, 100);
+    // Re-intentar después de cada actualización de Livewire (cambio Kanban→Calendario)
+    Livewire.hook('morph.updated', ({el}) => {
+        setTimeout(() => {
+            var calEl = document.getElementById('area-calendar');
+            if (calEl && !calEl.dataset.init) {
+                calEl.dataset.init = '1';
+                var evts = JSON.parse(calEl.getAttribute('data-events') || '[]');
+                var tip = null;
+                var c2 = new FullCalendar.Calendar(calEl, {
+                    initialView: 'dayGridMonth', locale: 'es', firstDay: 1, height: 'auto', events: evts,
+                    headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' },
+                    buttonText: { today: 'Hoy', month: 'Mensual', week: 'Semanal', day: 'Diario' },
+                    dayMaxEvents: 3,
+                    moreLinkText: function(n) { return '+' + n + ' más'; },
+                    eventDidMount: function(info) {
+                        info.el.addEventListener('mouseenter', function() {
+                            var p = info.event.extendedProps;
+                            tip = document.createElement('div'); tip.className = 'fc-area-tooltip';
+                            tip.innerHTML = '<b style="color:#4f46e5">' + p.code + '</b><br><small>Paciente: ' + (p.patient||'—') + '<br>Doctor: Dr. ' + (p.doctor||'—') + '<br>Estado: ' + p.status + '</small>';
+                            document.body.appendChild(tip);
+                            var r = info.el.getBoundingClientRect();
+                            tip.style.top = (r.bottom+8)+'px'; tip.style.left = Math.min(r.left, window.innerWidth-300)+'px';
+                        });
+                        info.el.addEventListener('mouseleave', function() { if(tip){tip.remove();tip=null;} });
+                    },
+                    eventClick: function(info) { info.jsEvent.preventDefault(); if(info.event.url) Livewire.navigate(info.event.url); },
+                });
+                c2.render();
+            }
+        }, 150);
     });
 </script>
 @endscript
+
