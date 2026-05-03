@@ -44,12 +44,15 @@ class AdminDashboard extends Component
         $inProgress = WorkOrder::where('status', 'in_progress')->count();
         $completed = WorkOrder::where('status', 'completed')->count();
         
-        $delayedOrders = WorkOrder::where('status', '!=', 'completed')
+        // Excluir todos los estados terminales para las alertas
+        $terminalStatuses = ['completed', 'delivered', 'cancelled'];
+
+        $delayedOrders = WorkOrder::whereNotIn('status', $terminalStatuses)
             ->whereNotNull('delivery_date')
             ->where('delivery_date', '<', now())
             ->get();
 
-        $urgentOrders = WorkOrder::where('status', '!=', 'completed')
+        $urgentOrders = WorkOrder::whereNotIn('status', $terminalStatuses)
             ->where('priority', 'urgent')
             ->get();
 
