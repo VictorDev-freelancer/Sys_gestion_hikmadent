@@ -11,7 +11,7 @@
     <div class="py-6">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
 
-            {{-- Botones de vista (dentro del componente Livewire) --}}
+            {{-- Botones de vista --}}
             <div class="flex justify-end mb-4 gap-1">
                 <button wire:click="setView('kanban')" class="px-3 py-1.5 rounded-lg text-sm font-medium transition"
                     style="{{ $view === 'kanban' ? 'background:#4f46e5;color:white;' : 'background:#f3f4f6;color:#4b5563;' }}">
@@ -47,14 +47,10 @@
                 </div>
             </div>
 
-            {{-- ═══════════════════════════════════════════ --}}
-            {{-- VISTA KANBAN                                --}}
-            {{-- ═══════════════════════════════════════════ --}}
+            {{-- ═══ VISTA KANBAN ═══ --}}
             @if($view === 'kanban')
 
-            {{-- FILA 1: Kanban — 3 columnas --}}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-
                 {{-- ASIGNADO --}}
                 <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
                     <div class="px-4 py-3 border-b" style="background:#eff6ff">
@@ -133,36 +129,31 @@
                 </div>
             </div>
 
-            {{-- FILA 2: HISTORIAL DE TRABAJOS --}}
+            {{-- HISTORIAL --}}
             <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
                 <div class="px-6 py-4 border-b flex items-center justify-between" style="background:#f5f3ff">
-                    <h3 class="font-bold text-base flex items-center gap-2" style="color:#5b21b6">
-                        📜 Historial de Trabajos Realizados
-                    </h3>
+                    <h3 class="font-bold text-base flex items-center gap-2" style="color:#5b21b6">📜 Historial de Trabajos Realizados</h3>
                     <span class="text-xs font-bold px-3 py-1 rounded-full" style="background:#ddd6fe;color:#5b21b6">{{ $historyItems->count() }} entregas</span>
                 </div>
-
                 @if($historyItems->count())
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y" style="border-color:#e5e7eb">
                         <thead>
                             <tr style="background:#faf5ff">
-                                <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider" style="color:#6b7280">Código OT</th>
-                                <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider" style="color:#6b7280">Paciente</th>
-                                <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider" style="color:#6b7280">Doctor</th>
-                                <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider" style="color:#6b7280">Responsable</th>
-                                <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider" style="color:#6b7280">Fecha Inicio</th>
-                                <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider" style="color:#6b7280">Fecha Entrega</th>
-                                <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider" style="color:#6b7280">Duración</th>
-                                <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider" style="color:#6b7280">Estado</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold uppercase" style="color:#6b7280">Código OT</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold uppercase" style="color:#6b7280">Paciente</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold uppercase" style="color:#6b7280">Doctor</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold uppercase" style="color:#6b7280">Responsable</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold uppercase" style="color:#6b7280">Fecha Inicio</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold uppercase" style="color:#6b7280">Fecha Entrega</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold uppercase" style="color:#6b7280">Duración</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold uppercase" style="color:#6b7280">Estado</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y" style="border-color:#f3f4f6">
                             @foreach($historyItems as $woa)
                             <tr class="hover:bg-gray-50 transition">
-                                <td class="px-4 py-3">
-                                    <a href="{{ route('work-orders.show', $woa->workOrder) }}" class="font-mono text-sm font-bold" style="color:#4f46e5" wire:navigate>{{ $woa->workOrder->code }}</a>
-                                </td>
+                                <td class="px-4 py-3"><a href="{{ route('work-orders.show', $woa->workOrder) }}" class="font-mono text-sm font-bold" style="color:#4f46e5" wire:navigate>{{ $woa->workOrder->code }}</a></td>
                                 <td class="px-4 py-3 text-sm text-gray-800">{{ $woa->workOrder->patient_name }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">Dr. {{ $woa->workOrder->doctor_name }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">{{ $woa->assignedUser?->name ?? '—' }}</td>
@@ -174,9 +165,7 @@
                                         {{ $diff->days > 0 ? $diff->days.'d '.$diff->h.'h' : $diff->h.'h '.$diff->i.'m' }}
                                     @else — @endif
                                 </td>
-                                <td class="px-4 py-3">
-                                    <span class="px-2 py-1 rounded-full text-xs font-bold" style="background:#d1fae5;color:#065f46">✅ Entregado</span>
-                                </td>
+                                <td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs font-bold" style="background:#d1fae5;color:#065f46">✅ Entregado</span></td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -186,16 +175,13 @@
                 <div class="text-center py-12 text-gray-300">
                     <p class="text-4xl mb-3">📋</p>
                     <p class="text-lg font-medium">Sin entregas registradas</p>
-                    <p class="text-sm mt-1">Cuando confirmes entregas en la columna "Finalizado", aparecerán aquí.</p>
                 </div>
                 @endif
             </div>
 
             @endif
 
-            {{-- ═══════════════════════════════════════════ --}}
-            {{-- VISTA FULLCALENDAR                          --}}
-            {{-- ═══════════════════════════════════════════ --}}
+            {{-- ═══ VISTA FULLCALENDAR ═══ --}}
             @if($view === 'calendar')
             <div class="bg-white rounded-xl shadow-xl overflow-hidden">
                 <div class="px-6 py-4 flex items-center justify-between" style="background:linear-gradient(135deg,{{ $area->color }}, {{ $area->color }}cc);border-bottom:2px solid {{ $area->color }}">
@@ -214,98 +200,78 @@
                     </div>
                 </div>
                 <div class="p-4" wire:ignore>
-                    <div id="area-calendar"></div>
+                    <div id="area-calendar" data-events='@json($calendarEvents)'></div>
                 </div>
             </div>
 
-            {{-- Estilos del calendario --}}
             <style>
                 #area-calendar .fc { font-family: 'Figtree', ui-sans-serif, system-ui, sans-serif; }
                 #area-calendar .fc-toolbar-title { font-size: 1.25rem !important; font-weight: 700 !important; color: #1f2937 !important; text-transform: capitalize; }
-                #area-calendar .fc-button { background: {{ $area->color }} !important; border-color: {{ $area->color }} !important; font-weight: 600 !important; font-size: 0.8rem !important; padding: 6px 14px !important; border-radius: 8px !important; transition: all 0.15s !important; }
-                #area-calendar .fc-button:hover { filter: brightness(0.85) !important; transform: translateY(-1px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2) !important; }
-                #area-calendar .fc-button-active { filter: brightness(0.75) !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.15) !important; }
+                #area-calendar .fc-button { background: {{ $area->color }} !important; border-color: {{ $area->color }} !important; font-weight: 600 !important; font-size: 0.8rem !important; padding: 6px 14px !important; border-radius: 8px !important; }
+                #area-calendar .fc-button:hover { filter: brightness(0.85) !important; transform: translateY(-1px); }
+                #area-calendar .fc-button-active { filter: brightness(0.75) !important; }
                 #area-calendar .fc-today-button { background: #059669 !important; border-color: #047857 !important; }
                 #area-calendar .fc-day-today { background: {{ $area->color }}10 !important; }
                 #area-calendar .fc-daygrid-day-number { font-weight: 600; color: #374151; padding: 6px 10px !important; }
                 #area-calendar .fc-day-today .fc-daygrid-day-number { background: {{ $area->color }}; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
-                #area-calendar .fc-event { border-radius: 6px !important; padding: 2px 6px !important; font-size: 0.72rem !important; font-weight: 600 !important; cursor: pointer !important; border-width: 2px !important; transition: transform 0.1s, box-shadow 0.1s !important; }
-                #area-calendar .fc-event:hover { transform: scale(1.02); box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important; z-index: 10 !important; }
-                #area-calendar .fc-col-header-cell { background: #f9fafb; font-weight: 700 !important; text-transform: uppercase !important; font-size: 0.7rem !important; color: #6b7280 !important; padding: 10px 0 !important; }
-                #area-calendar .fc-popover { border-radius: 12px !important; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15) !important; border: 1px solid #e5e7eb !important; }
-                #area-calendar .fc-popover-header { background: {{ $area->color }} !important; color: white !important; border-radius: 12px 12px 0 0 !important; font-weight: 700 !important; padding: 8px 12px !important; }
+                #area-calendar .fc-event { border-radius: 6px !important; padding: 2px 6px !important; font-size: 0.72rem !important; font-weight: 600 !important; cursor: pointer !important; }
+                #area-calendar .fc-event:hover { transform: scale(1.02); box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important; }
+                #area-calendar .fc-col-header-cell { background: #f9fafb; font-weight: 700 !important; text-transform: uppercase !important; font-size: 0.7rem !important; color: #6b7280 !important; }
                 .fc-area-tooltip { position: fixed; z-index: 9999; background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.12); pointer-events: none; min-width: 220px; max-width: 280px; }
             </style>
-
-            {{-- Carga dinámica de FullCalendar --}}
-            <script>
-            (function() {
-                function initAreaCalendar() {
-                    const calendarEl = document.getElementById('area-calendar');
-                    if (!calendarEl || calendarEl.dataset.initialized) return;
-                    calendarEl.dataset.initialized = 'true';
-
-                    const events = @json($calendarEvents);
-                    let tooltipEl = null;
-
-                    const calendar = new FullCalendar.Calendar(calendarEl, {
-                        initialView: 'dayGridMonth',
-                        locale: 'es',
-                        firstDay: 1,
-                        height: 'auto',
-                        events: events,
-                        headerToolbar: {
-                            left: 'prev,next today',
-                            center: 'title',
-                            right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                        },
-                        buttonText: { today: 'Hoy', month: '📅 Mensual', week: '📆 Semanal', day: '🕐 Diario' },
-                        dayMaxEvents: 3,
-                        moreLinkText: function(num) { return '+' + num + ' más'; },
-                        eventDidMount: function(info) {
-                            info.el.addEventListener('mouseenter', function(e) {
-                                const p = info.event.extendedProps;
-                                tooltipEl = document.createElement('div');
-                                tooltipEl.className = 'fc-area-tooltip';
-                                tooltipEl.innerHTML = '<div style="margin-bottom:8px"><span style="font-family:monospace;font-weight:800;color:#4f46e5;font-size:0.9rem">' + p.code + '</span>' + (p.isDelayed ? ' <span style="background:#fee2e2;color:#991b1b;font-size:0.65rem;font-weight:700;padding:2px 6px;border-radius:9999px;margin-left:6px">⚠️ RETRASADA</span>' : '') + '</div><div style="display:grid;gap:4px;font-size:0.78rem"><div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Paciente</span><span style="color:#1f2937;font-weight:600">' + (p.patient || '—') + '</span></div><div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Doctor</span><span style="color:#1f2937;font-weight:600">Dr. ' + (p.doctor || '—') + '</span></div><div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Estado</span><span style="font-weight:600;color:#374151">' + p.status + '</span></div><div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Responsable</span><span style="font-weight:600;color:#374151">' + p.technician + '</span></div><div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Prioridad</span><span style="font-weight:600;color:' + (p.priorityVal === 'urgent' ? '#dc2626' : '#374151') + '">' + p.priority + '</span></div>' + (p.deliveryDate ? '<div style="display:flex;justify-content:space-between;padding-top:4px;border-top:1px solid #f3f4f6"><span style="color:#9ca3af">Entrega</span><span style="font-weight:700;color:' + (p.isDelayed ? '#dc2626' : '#059669') + '">' + p.deliveryDate + '</span></div>' : '') + '</div>';
-                                document.body.appendChild(tooltipEl);
-                                const rect = info.el.getBoundingClientRect();
-                                tooltipEl.style.top = (rect.bottom + 8) + 'px';
-                                tooltipEl.style.left = Math.min(rect.left, window.innerWidth - 300) + 'px';
-                            });
-                            info.el.addEventListener('mouseleave', function() {
-                                if (tooltipEl) { tooltipEl.remove(); tooltipEl = null; }
-                            });
-                        },
-                        eventClick: function(info) {
-                            info.jsEvent.preventDefault();
-                            if (info.event.url) { Livewire.navigate(info.event.url); }
-                        },
-                        noEventsText: 'Sin órdenes pendientes para este periodo',
-                    });
-                    calendar.render();
-                    window.addEventListener('scroll', function() { if (tooltipEl) { tooltipEl.remove(); tooltipEl = null; } }, true);
-                }
-
-                // Cargar FullCalendar CDN si no está cargado
-                if (typeof FullCalendar === 'undefined') {
-                    var link = document.createElement('link');
-                    link.rel = 'stylesheet';
-                    link.href = 'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css';
-                    document.head.appendChild(link);
-
-                    var script = document.createElement('script');
-                    script.src = 'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js';
-                    script.onload = function() { initAreaCalendar(); };
-                    document.head.appendChild(script);
-                } else {
-                    initAreaCalendar();
-                }
-            })();
-            </script>
             @endif
 
         </div>
     </div>
 </div>
 
+@script
+<script>
+    // Función para cargar FullCalendar CDN
+    function loadFC(cb) {
+        if (typeof FullCalendar !== 'undefined') { cb(); return; }
+        var l = document.createElement('link'); l.rel = 'stylesheet';
+        l.href = 'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css';
+        document.head.appendChild(l);
+        var s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js';
+        s.onload = cb; document.head.appendChild(s);
+    }
+
+    function initAreaCalendar() {
+        var el = document.getElementById('area-calendar');
+        if (!el || el.dataset.init === '1') return;
+        el.dataset.init = '1';
+        var events = JSON.parse(el.getAttribute('data-events') || '[]');
+        var tt = null;
+        var cal = new FullCalendar.Calendar(el, {
+            initialView: 'dayGridMonth', locale: 'es', firstDay: 1, height: 'auto', events: events,
+            headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' },
+            buttonText: { today: 'Hoy', month: 'Mensual', week: 'Semanal', day: 'Diario' },
+            dayMaxEvents: 3,
+            moreLinkText: function(n) { return '+' + n + ' más'; },
+            eventDidMount: function(info) {
+                info.el.addEventListener('mouseenter', function() {
+                    var p = info.event.extendedProps;
+                    tt = document.createElement('div'); tt.className = 'fc-area-tooltip';
+                    tt.innerHTML = '<b style="color:#4f46e5">' + p.code + '</b>' + (p.isDelayed ? ' <span style="color:red;font-size:11px">⚠️ RETRASADA</span>' : '') + '<br><small>Paciente: ' + (p.patient||'—') + '<br>Doctor: Dr. ' + (p.doctor||'—') + '<br>Estado: ' + p.status + '<br>Responsable: ' + p.technician + '<br>Prioridad: ' + p.priority + (p.deliveryDate ? '<br>Entrega: ' + p.deliveryDate : '') + '</small>';
+                    document.body.appendChild(tt);
+                    var r = info.el.getBoundingClientRect();
+                    tt.style.top = (r.bottom + 8) + 'px'; tt.style.left = Math.min(r.left, window.innerWidth - 300) + 'px';
+                });
+                info.el.addEventListener('mouseleave', function() { if (tt) { tt.remove(); tt = null; } });
+            },
+            eventClick: function(info) { info.jsEvent.preventDefault(); if (info.event.url) Livewire.navigate(info.event.url); },
+        });
+        cal.render();
+    }
+
+    // Intentar inicializar al cargar
+    loadFC(initAreaCalendar);
+
+    // Re-intentar después de cada actualización de Livewire
+    Livewire.hook('morph.updated', () => {
+        setTimeout(function() { loadFC(initAreaCalendar); }, 100);
+    });
+</script>
+@endscript

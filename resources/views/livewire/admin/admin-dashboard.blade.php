@@ -65,7 +65,7 @@
                     </div>
                 </div>
                 <div class="p-4" wire:ignore>
-                    <div id="admin-calendar"></div>
+                    <div id="admin-calendar" data-events='@json($calendarEvents)'></div>
                 </div>
             </div>
 
@@ -256,7 +256,7 @@
         </div>
     </div>
 
-    {{-- FullCalendar: Estilos + Carga dinámica (DENTRO del div raíz de Livewire) --}}
+    {{-- FullCalendar Estilos --}}
     <style>
         #admin-calendar .fc { font-family: 'Figtree', ui-sans-serif, system-ui, sans-serif; }
         #admin-calendar .fc-toolbar-title { font-size: 1.25rem !important; font-weight: 700 !important; color: #1f2937 !important; text-transform: capitalize; }
@@ -272,39 +272,48 @@
         #admin-calendar .fc-col-header-cell { background: #f9fafb; font-weight: 700 !important; text-transform: uppercase !important; font-size: 0.7rem !important; color: #6b7280 !important; }
         .fc-event-tooltip { position: fixed; z-index: 9999; background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.12); pointer-events: none; min-width: 240px; max-width: 300px; }
     </style>
-    <script>
-    (function(){
-        function init(){
-            var el=document.getElementById('admin-calendar');
-            if(!el||el.dataset.init)return;
-            el.dataset.init='1';
-            var ev=@json($calendarEvents);
-            var tt=null;
-            var c=new FullCalendar.Calendar(el,{
-                initialView:'dayGridMonth',locale:'es',firstDay:1,height:'auto',events:ev,
-                headerToolbar:{left:'prev,next today',center:'title',right:'dayGridMonth,timeGridWeek,timeGridDay'},
-                buttonText:{today:'Hoy',month:'Mensual',week:'Semanal',day:'Diario'},
-                dayMaxEvents:3,
-                moreLinkText:function(n){return '+'+n+' más';},
-                eventDidMount:function(info){
-                    info.el.addEventListener('mouseenter',function(){
-                        var p=info.event.extendedProps;
-                        tt=document.createElement('div');tt.className='fc-event-tooltip';
-                        tt.innerHTML='<b style="color:#4f46e5">'+p.code+'</b>'+(p.isDelayed?' <span style="color:red;font-size:11px">⚠️ RETRASADA</span>':'')+'<br><small>Paciente: '+(p.patient||'—')+'<br>Doctor: Dr. '+(p.doctor||'—')+'<br>Área: '+p.area+'<br>Estado: '+p.status+'<br>Prioridad: '+p.priority+(p.deliveryDate?'<br>Entrega: '+p.deliveryDate:'')+'</small>';
-                        document.body.appendChild(tt);
-                        var r=info.el.getBoundingClientRect();
-                        tt.style.top=(r.bottom+8)+'px';tt.style.left=Math.min(r.left,window.innerWidth-320)+'px';
-                    });
-                    info.el.addEventListener('mouseleave',function(){if(tt){tt.remove();tt=null;}});
-                },
-                eventClick:function(info){info.jsEvent.preventDefault();if(info.event.url)Livewire.navigate(info.event.url);},
-            });
-            c.render();
-        }
-        if(typeof FullCalendar==='undefined'){
-            var l=document.createElement('link');l.rel='stylesheet';l.href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css';document.head.appendChild(l);
-            var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js';s.onload=init;document.head.appendChild(s);
-        }else{init();}
-    })();
-    </script>
 </div>
+
+@script
+<script>
+    function loadFC(cb) {
+        if (typeof FullCalendar !== 'undefined') { cb(); return; }
+        var l = document.createElement('link'); l.rel = 'stylesheet';
+        l.href = 'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css';
+        document.head.appendChild(l);
+        var s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js';
+        s.onload = cb; document.head.appendChild(s);
+    }
+
+    function initAdminCalendar() {
+        var el = document.getElementById('admin-calendar');
+        if (!el || el.dataset.init === '1') return;
+        el.dataset.init = '1';
+        var events = JSON.parse(el.getAttribute('data-events') || '[]');
+        var tt = null;
+        var c = new FullCalendar.Calendar(el, {
+            initialView: 'dayGridMonth', locale: 'es', firstDay: 1, height: 'auto', events: events,
+            headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' },
+            buttonText: { today: 'Hoy', month: 'Mensual', week: 'Semanal', day: 'Diario' },
+            dayMaxEvents: 3,
+            moreLinkText: function(n) { return '+' + n + ' más'; },
+            eventDidMount: function(info) {
+                info.el.addEventListener('mouseenter', function() {
+                    var p = info.event.extendedProps;
+                    tt = document.createElement('div'); tt.className = 'fc-event-tooltip';
+                    tt.innerHTML = '<b style="color:#4f46e5">' + p.code + '</b>' + (p.isDelayed ? ' <span style="color:red;font-size:11px">⚠️ RETRASADA</span>' : '') + '<br><small>Paciente: ' + (p.patient||'—') + '<br>Doctor: Dr. ' + (p.doctor||'—') + '<br>Área: ' + p.area + '<br>Estado: ' + p.status + '<br>Prioridad: ' + p.priority + (p.deliveryDate ? '<br>Entrega: ' + p.deliveryDate : '') + '</small>';
+                    document.body.appendChild(tt);
+                    var r = info.el.getBoundingClientRect();
+                    tt.style.top = (r.bottom+8)+'px'; tt.style.left = Math.min(r.left, window.innerWidth-320)+'px';
+                });
+                info.el.addEventListener('mouseleave', function() { if(tt){tt.remove();tt=null;} });
+            },
+            eventClick: function(info) { info.jsEvent.preventDefault(); if(info.event.url) Livewire.navigate(info.event.url); },
+        });
+        c.render();
+    }
+
+    loadFC(initAdminCalendar);
+</script>
+@endscript
