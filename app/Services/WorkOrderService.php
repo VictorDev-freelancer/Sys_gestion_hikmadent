@@ -269,11 +269,18 @@ class WorkOrderService
     {
         $order = $this->transitionTo($workOrder, WorkOrderStatus::DELIVERED);
 
-        // Confirmar entrega en el Kanban del área activa para que pase a su historial
+        // Confirmar entrega en TODAS las áreas que no estén debidamente cerradas
         $activeAreas = $workOrder->workOrderAreas()
             ->where(function ($q) {
-                $q->whereNull('notes')
-                  ->orWhere('notes', 'not like', '%Entrega confirmada%');
+                // Áreas que aún no están en completed, o que no tienen confirmación de entrega
+                $q->where('kanban_status', '!=', 'completed')
+                  ->orWhere(function ($q2) {
+                      $q2->where('kanban_status', 'completed')
+                         ->where(function ($q3) {
+                             $q3->whereNull('notes')
+                                ->orWhere('notes', 'not like', '%Entrega confirmada%');
+                         });
+                  });
             })
             ->get();
 

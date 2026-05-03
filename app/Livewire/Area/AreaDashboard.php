@@ -173,10 +173,20 @@ class AreaDashboard extends Component
             'stages.performer',
         ];
 
+        // Estados terminales de la WorkOrder global
+        $terminalStatuses = ['completed', 'delivered', 'cancelled'];
+
         $baseQuery = WorkOrderArea::with($eagerLoads)
+            ->where('area_id', $this->area->id)
+            ->whereHas('workOrder', function ($q) use ($terminalStatuses) {
+                $q->whereNotIn('status', $terminalStatuses);
+            });
+
+        // Base query sin filtro de estado global (para historial)
+        $allAreaQuery = WorkOrderArea::with($eagerLoads)
             ->where('area_id', $this->area->id);
 
-        // Kanban: solo órdenes NO entregadas
+        // Kanban: solo órdenes cuya WorkOrder NO está en estado terminal
         $kanbanItems = [
             'pending'     => (clone $baseQuery)->where('kanban_status', 'pending')->get(),
             'in_progress' => (clone $baseQuery)->where('kanban_status', 'in_progress')->get(),
@@ -188,8 +198,8 @@ class AreaDashboard extends Component
                 })->get(),
         ];
 
-        // Historial: órdenes con entrega confirmada
-        $historyItems = (clone $baseQuery)
+        // Historial: órdenes con entrega confirmada (incluye estados terminales)
+        $historyItems = (clone $allAreaQuery)
             ->where('kanban_status', 'completed')
             ->whereNotNull('completed_at')
             ->where('notes', 'like', '%Entrega confirmada%')
@@ -199,7 +209,7 @@ class AreaDashboard extends Component
 
         // Estadísticas
         $stats = [
-            'total'       => (clone $baseQuery)->count(),
+            'total'       => (clone $allAreaQuery)->count(),
             'pending'     => $kanbanItems['pending']->count(),
             'in_progress' => $kanbanItems['in_progress']->count(),
             'completed'   => $kanbanItems['completed']->count(),
