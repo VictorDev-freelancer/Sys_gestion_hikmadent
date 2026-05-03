@@ -10,17 +10,9 @@
                     style="{{ $view === 'kanban' ? 'background:#4f46e5;color:white;' : 'background:#f3f4f6;color:#4b5563;' }}">
                     📋 Kanban
                 </button>
-                <button wire:click="setView('monthly')" class="px-3 py-1.5 rounded-lg text-sm font-medium transition"
-                    style="{{ $view === 'monthly' ? 'background:#4f46e5;color:white;' : 'background:#f3f4f6;color:#4b5563;' }}">
-                    📅 Mensual
-                </button>
-                <button wire:click="setView('weekly')" class="px-3 py-1.5 rounded-lg text-sm font-medium transition"
-                    style="{{ $view === 'weekly' ? 'background:#4f46e5;color:white;' : 'background:#f3f4f6;color:#4b5563;' }}">
-                    📆 Semanal
-                </button>
-                <button wire:click="setView('daily')" class="px-3 py-1.5 rounded-lg text-sm font-medium transition"
-                    style="{{ $view === 'daily' ? 'background:#4f46e5;color:white;' : 'background:#f3f4f6;color:#4b5563;' }}">
-                    🕐 Diario
+                <button wire:click="setView('calendar')" class="px-3 py-1.5 rounded-lg text-sm font-medium transition"
+                    style="{{ $view === 'calendar' ? 'background:#4f46e5;color:white;' : 'background:#f3f4f6;color:#4b5563;' }}">
+                    📅 Calendario
                 </button>
             </div>
         </div>
@@ -117,14 +109,12 @@
                             </div>
                             <p class="text-sm font-medium text-gray-800">{{ $woa->workOrder->patient_name }}</p>
                             <p class="text-xs text-gray-500">Dr. {{ $woa->workOrder->doctor_name }}</p>
-                            {{-- Progreso al 100% --}}
                             <div class="mt-2">
                                 <div class="w-full rounded-full h-1.5" style="background:#e5e7eb">
                                     <div class="h-1.5 rounded-full" style="width:{{ $woa->progress }}%;background:#10b981"></div>
                                 </div>
                                 <p class="text-xs text-right font-medium mt-1" style="color:#059669">{{ $woa->progress }}%</p>
                             </div>
-                            {{-- Botón CONFIRMAR ENTREGA --}}
                             <div class="mt-3 pt-2" style="border-top:1px solid #e5e7eb">
                                 <button wire:click="confirmDelivery({{ $woa->id }})"
                                         wire:confirm="¿Confirmar entrega de {{ $woa->workOrder->code }}? Esta acción moverá la orden al Historial."
@@ -141,7 +131,7 @@
                 </div>
             </div>
 
-            {{-- FILA 2: HISTORIAL DE TRABAJOS — ancho completo --}}
+            {{-- FILA 2: HISTORIAL DE TRABAJOS --}}
             <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
                 <div class="px-6 py-4 border-b flex items-center justify-between" style="background:#f5f3ff">
                     <h3 class="font-bold text-base flex items-center gap-2" style="color:#5b21b6">
@@ -202,157 +192,27 @@
             @endif
 
             {{-- ═══════════════════════════════════════════ --}}
-            {{-- CALENDARIO MENSUAL                          --}}
+            {{-- VISTA FULLCALENDAR                          --}}
             {{-- ═══════════════════════════════════════════ --}}
-            @if($view === 'monthly')
-            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                <div class="px-6 py-4 border-b flex items-center justify-between" style="background:#f9fafb">
-                    <button wire:click="previousPeriod" class="px-3 py-1.5 bg-white border rounded-lg hover:bg-gray-50 transition text-sm font-medium text-gray-700">← Anterior</button>
-                    <h3 class="text-lg font-bold text-gray-800 capitalize">{{ \Carbon\Carbon::parse($selectedDate)->locale('es')->translatedFormat('F Y') }}</h3>
-                    <div class="flex space-x-2">
-                        <button wire:click="today" class="px-3 py-1.5 rounded-lg text-sm font-medium text-white" style="background:#4f46e5">Hoy</button>
-                        <button wire:click="nextPeriod" class="px-3 py-1.5 bg-white border rounded-lg hover:bg-gray-50 transition text-sm font-medium text-gray-700">Siguiente →</button>
-                    </div>
-                </div>
-                <div class="grid grid-cols-7 border-b" style="background:#f9fafb">
-                    @foreach(['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'] as $d)
-                        <div class="px-2 py-2 text-center text-xs font-bold text-gray-500 uppercase">{{ $d }}</div>
-                    @endforeach
-                </div>
-                @foreach($monthGrid as $week)
-                <div class="grid grid-cols-7 border-b last:border-b-0">
-                    @foreach($week as $day)
-                    <div wire:click="selectDay('{{ $day['date']->format('Y-m-d') }}')"
-                         class="min-h-[100px] p-1.5 border-r last:border-r-0 cursor-pointer transition-colors"
-                         style="{{ !$day['inMonth'] ? 'background:#f9fafb;opacity:0.5;' : '' }}{{ $day['isToday'] ? 'background:#eff6ff;box-shadow:inset 0 0 0 2px #93c5fd;' : '' }}">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-sm {{ $day['isToday'] ? 'font-bold' : 'font-medium' }}" style="color:{{ $day['isToday'] ? '#1d4ed8' : ($day['inMonth'] ? '#374151' : '#9ca3af') }}">{{ $day['date']->day }}</span>
-                            @if(count($day['items']))
-                                <span class="w-5 h-5 flex items-center justify-center rounded-full text-xs font-bold text-white" style="background:{{ $area->color }}">{{ count($day['items']) }}</span>
-                            @endif
-                        </div>
-                        @foreach(array_slice($day['items'], 0, 3) as $woa)
-                            <div class="text-xs px-1.5 py-0.5 rounded truncate mb-0.5"
-                                 style="{{ $woa->kanban_status->value === 'completed' ? 'background:#d1fae5;color:#065f46' : ($woa->kanban_status->value === 'in_progress' ? 'background:#fef3c7;color:#92400e' : 'background:#dbeafe;color:#1e40af') }}">
-                                {{ $woa->workOrder->code }}
-                            </div>
-                        @endforeach
-                        @if(count($day['items']) > 3) <p class="text-xs text-gray-400 text-center">+{{ count($day['items']) - 3 }}</p> @endif
-                    </div>
-                    @endforeach
-                </div>
-                @endforeach
-            </div>
-            @endif
-
-            {{-- ═══════════════════════════════════════════ --}}
-            {{-- CALENDARIO SEMANAL                          --}}
-            {{-- ═══════════════════════════════════════════ --}}
-            @if($view === 'weekly')
-            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                <div class="px-6 py-4 border-b flex items-center justify-between" style="background:#f9fafb">
-                    <button wire:click="previousPeriod" class="px-3 py-1.5 bg-white border rounded-lg hover:bg-gray-50 transition text-sm font-medium text-gray-700">← Anterior</button>
-                    <div class="text-center">
-                        @php $ws = \Carbon\Carbon::parse($selectedDate)->startOfWeek(\Carbon\Carbon::MONDAY); $we = \Carbon\Carbon::parse($selectedDate)->endOfWeek(\Carbon\Carbon::SUNDAY); @endphp
-                        <h3 class="text-lg font-bold text-gray-800">{{ $ws->locale('es')->translatedFormat('d M') }} — {{ $we->locale('es')->translatedFormat('d M Y') }}</h3>
-                        <span class="text-sm text-gray-500">Vista Semanal</span>
-                    </div>
-                    <div class="flex space-x-2">
-                        <button wire:click="today" class="px-3 py-1.5 rounded-lg text-sm font-medium text-white" style="background:#4f46e5">Hoy</button>
-                        <button wire:click="nextPeriod" class="px-3 py-1.5 bg-white border rounded-lg hover:bg-gray-50 transition text-sm font-medium text-gray-700">Siguiente →</button>
-                    </div>
-                </div>
-                <div class="grid grid-cols-7 divide-x">
-                    @foreach($weekGrid as $day)
-                    <div class="min-h-[400px]" style="{{ $day['isToday'] ? 'background:#eff6ff' : '' }}">
-                        <div class="px-2 py-2 border-b text-center" style="{{ $day['isToday'] ? 'background:#dbeafe' : 'background:#f9fafb' }}">
-                            <p class="text-xs font-bold text-gray-500 uppercase">{{ $day['date']->locale('es')->translatedFormat('D') }}</p>
-                            <p class="text-lg font-bold" style="color:{{ $day['isToday'] ? '#1d4ed8' : '#1f2937' }}">{{ $day['date']->day }}</p>
-                        </div>
-                        <div class="p-1.5 space-y-1.5">
-                            @foreach($day['items'] as $woa)
-                            <div wire:click="selectDay('{{ $day['date']->format('Y-m-d') }}')" class="p-2 rounded-lg border text-xs cursor-pointer hover:shadow transition"
-                                 style="{{ $woa->kanban_status->value === 'completed' ? 'background:#ecfdf5;border-color:#a7f3d0' : ($woa->kanban_status->value === 'in_progress' ? 'background:#fffbeb;border-color:#fde68a' : 'background:#eff6ff;border-color:#bfdbfe') }}">
-                                <p class="font-mono font-bold" style="color:#4f46e5">{{ $woa->workOrder->code }}</p>
-                                <p class="text-gray-700 truncate">{{ $woa->workOrder->patient_name }}</p>
-                            </div>
-                            @endforeach
-                            @if(empty($day['items'])) <p class="text-center text-gray-300 text-xs py-6">—</p> @endif
+            @if($view === 'calendar')
+            <div class="bg-white rounded-xl shadow-xl overflow-hidden">
+                <div class="px-6 py-4 flex items-center justify-between" style="background:linear-gradient(135deg,{{ $area->color }}, {{ $area->color }}cc);border-bottom:2px solid {{ $area->color }}">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">📅</span>
+                        <div>
+                            <h3 class="font-bold text-white text-lg">Calendario — {{ $area->name }}</h3>
+                            <p class="text-white/70 text-xs">Órdenes de trabajo activas organizadas por fecha</p>
                         </div>
                     </div>
-                    @endforeach
-                </div>
-            </div>
-            @endif
-
-            {{-- ═══════════════════════════════════════════ --}}
-            {{-- CALENDARIO DIARIO                           --}}
-            {{-- ═══════════════════════════════════════════ --}}
-            @if($view === 'daily')
-            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                <div class="px-6 py-4 border-b flex items-center justify-between" style="background:#f9fafb">
-                    <button wire:click="previousPeriod" class="px-3 py-1.5 bg-white border rounded-lg hover:bg-gray-50 transition text-sm font-medium text-gray-700">← Anterior</button>
-                    <div class="text-center">
-                        <h3 class="text-lg font-bold text-gray-800 capitalize">{{ \Carbon\Carbon::parse($selectedDate)->locale('es')->translatedFormat('l, d \d\e F Y') }}</h3>
-                        <span class="text-sm text-gray-500">{{ $area->name }}</span>
-                    </div>
-                    <div class="flex space-x-2">
-                        <button wire:click="today" class="px-3 py-1.5 rounded-lg text-sm font-medium text-white" style="background:#4f46e5">Hoy</button>
-                        <button wire:click="nextPeriod" class="px-3 py-1.5 bg-white border rounded-lg hover:bg-gray-50 transition text-sm font-medium text-gray-700">Siguiente →</button>
+                    <div class="flex items-center gap-2 text-xs text-white/80">
+                        <span class="w-3 h-3 rounded-full inline-block" style="background:#3b82f6"></span> Asignado
+                        <span class="w-3 h-3 rounded-full inline-block ml-2" style="background:#f59e0b"></span> En desarrollo
+                        <span class="w-3 h-3 rounded-full inline-block ml-2" style="background:#10b981"></span> Completado
+                        <span class="w-3 h-3 rounded-full inline-block ml-2" style="background:#ef4444"></span> Retrasada
                     </div>
                 </div>
-                <div class="p-6">
-                    @forelse($daySchedule as $woa)
-                    <div class="border rounded-xl overflow-hidden mb-4 hover:shadow-lg transition-all">
-                        <div class="flex items-center justify-between p-4 border-b" style="background:#f9fafb">
-                            <div class="flex items-center space-x-4">
-                                <div class="w-2 h-12 rounded-full" style="background:{{ $area->color }}"></div>
-                                <div>
-                                    <a href="{{ route('work-orders.show', $woa->workOrder) }}" class="font-mono font-bold text-sm" style="color:#4f46e5" wire:navigate>{{ $woa->workOrder->code }}</a>
-                                    <p class="text-sm text-gray-800 font-medium">{{ $woa->workOrder->patient_name }}</p>
-                                    <p class="text-xs text-gray-500">Dr. {{ $woa->workOrder->doctor_name }}</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-3">
-                                @if($woa->assignedUser)
-                                <div class="text-right"><p class="text-xs text-gray-400">Responsable</p><p class="text-sm font-medium text-gray-700">{{ $woa->assignedUser->name }}</p></div>
-                                @endif
-                                <span class="px-3 py-1 rounded-full text-xs font-bold"
-                                    style="{{ $woa->kanban_status->value === 'completed' ? 'background:#d1fae5;color:#065f46' : ($woa->kanban_status->value === 'in_progress' ? 'background:#fef3c7;color:#92400e' : 'background:#dbeafe;color:#1e40af') }}">
-                                    {{ $woa->kanban_status->label() }}
-                                </span>
-                            </div>
-                        </div>
-                        @if($woa->stages->count())
-                        <div class="p-4">
-                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Checklist</p>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                @foreach($woa->stages as $stage)
-                                <label wire:click="toggleStage({{ $stage->id }})" class="flex items-center gap-3 p-2 rounded-lg cursor-pointer transition"
-                                       style="{{ $stage->is_completed ? 'background:#ecfdf5;border:1px solid #a7f3d0' : 'background:#f9fafb;border:1px solid #e5e7eb' }}">
-                                    <div class="w-5 h-5 rounded flex items-center justify-center flex-shrink-0"
-                                         style="{{ $stage->is_completed ? 'background:#10b981;border:2px solid #10b981;color:white' : 'border:2px solid #d1d5db' }}">
-                                        @if($stage->is_completed)<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>@endif
-                                    </div>
-                                    <p class="text-sm font-medium" style="{{ $stage->is_completed ? 'color:#065f46;text-decoration:line-through' : 'color:#374151' }}">{{ $stage->areaStage->name }}</p>
-                                </label>
-                                @endforeach
-                            </div>
-                            <div class="mt-3 flex items-center gap-3">
-                                <div class="flex-1 bg-gray-200 rounded-full h-2">
-                                    <div class="h-2 rounded-full transition-all" style="width:{{ $woa->progress }}%;background:#10b981"></div>
-                                </div>
-                                <span class="text-sm font-bold text-gray-600">{{ $woa->progress }}%</span>
-                            </div>
-                        </div>
-                        @endif
-                    </div>
-                    @empty
-                    <div class="text-center py-16 text-gray-300">
-                        <p class="text-5xl mb-3">📭</p>
-                        <p class="text-lg font-medium">Sin trabajos para esta fecha</p>
-                    </div>
-                    @endforelse
+                <div class="p-4" wire:ignore>
+                    <div id="area-calendar"></div>
                 </div>
             </div>
             @endif
@@ -360,3 +220,89 @@
         </div>
     </div>
 </div>
+
+{{-- FullCalendar CDN (solo carga si vista = calendar) --}}
+@if($view === 'calendar')
+@push('scripts')
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+
+<style>
+    #area-calendar .fc { font-family: 'Figtree', ui-sans-serif, system-ui, sans-serif; }
+    #area-calendar .fc-toolbar-title { font-size: 1.25rem !important; font-weight: 700 !important; color: #1f2937 !important; text-transform: capitalize; }
+    #area-calendar .fc-button { background: {{ $area->color }} !important; border-color: {{ $area->color }} !important; font-weight: 600 !important; font-size: 0.8rem !important; padding: 6px 14px !important; border-radius: 8px !important; transition: all 0.15s !important; }
+    #area-calendar .fc-button:hover { filter: brightness(0.85) !important; transform: translateY(-1px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2) !important; }
+    #area-calendar .fc-button-active { filter: brightness(0.75) !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.15) !important; }
+    #area-calendar .fc-today-button { background: #059669 !important; border-color: #047857 !important; }
+    #area-calendar .fc-day-today { background: {{ $area->color }}10 !important; }
+    #area-calendar .fc-daygrid-day-number { font-weight: 600; color: #374151; padding: 6px 10px !important; }
+    #area-calendar .fc-day-today .fc-daygrid-day-number { background: {{ $area->color }}; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
+    #area-calendar .fc-event { border-radius: 6px !important; padding: 2px 6px !important; font-size: 0.72rem !important; font-weight: 600 !important; cursor: pointer !important; border-width: 2px !important; transition: transform 0.1s, box-shadow 0.1s !important; }
+    #area-calendar .fc-event:hover { transform: scale(1.02); box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important; z-index: 10 !important; }
+    #area-calendar .fc-col-header-cell { background: #f9fafb; font-weight: 700 !important; text-transform: uppercase !important; font-size: 0.7rem !important; color: #6b7280 !important; padding: 10px 0 !important; }
+    #area-calendar .fc-popover { border-radius: 12px !important; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15) !important; border: 1px solid #e5e7eb !important; }
+    #area-calendar .fc-popover-header { background: {{ $area->color }} !important; color: white !important; border-radius: 12px 12px 0 0 !important; font-weight: 700 !important; padding: 8px 12px !important; }
+    .fc-area-tooltip { position: fixed; z-index: 9999; background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.12); pointer-events: none; min-width: 220px; max-width: 280px; }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const calendarEl = document.getElementById('area-calendar');
+    if (!calendarEl) return;
+
+    const events = @json($calendarEvents);
+    let tooltipEl = null;
+
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'es',
+        firstDay: 1,
+        height: 'auto',
+        events: events,
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        buttonText: { today: 'Hoy', month: '📅 Mensual', week: '📆 Semanal', day: '🕐 Diario' },
+        dayMaxEvents: 3,
+        moreLinkText: function(num) { return '+' + num + ' más'; },
+        eventDidMount: function(info) {
+            info.el.addEventListener('mouseenter', function(e) {
+                const p = info.event.extendedProps;
+                tooltipEl = document.createElement('div');
+                tooltipEl.className = 'fc-area-tooltip';
+                tooltipEl.innerHTML = `
+                    <div style="margin-bottom:8px">
+                        <span style="font-family:monospace;font-weight:800;color:#4f46e5;font-size:0.9rem">${p.code}</span>
+                        ${p.isDelayed ? '<span style="background:#fee2e2;color:#991b1b;font-size:0.65rem;font-weight:700;padding:2px 6px;border-radius:9999px;margin-left:6px">⚠️ RETRASADA</span>' : ''}
+                    </div>
+                    <div style="display:grid;gap:4px;font-size:0.78rem">
+                        <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Paciente</span><span style="color:#1f2937;font-weight:600">${p.patient || '—'}</span></div>
+                        <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Doctor</span><span style="color:#1f2937;font-weight:600">Dr. ${p.doctor || '—'}</span></div>
+                        <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Estado</span><span style="font-weight:600;color:#374151">${p.status}</span></div>
+                        <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Responsable</span><span style="font-weight:600;color:#374151">${p.technician}</span></div>
+                        <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Prioridad</span><span style="font-weight:600;color:${p.priorityVal === 'urgent' ? '#dc2626' : '#374151'}">${p.priority}</span></div>
+                        ${p.deliveryDate ? '<div style="display:flex;justify-content:space-between;padding-top:4px;border-top:1px solid #f3f4f6"><span style="color:#9ca3af">Entrega</span><span style="font-weight:700;color:' + (p.isDelayed ? '#dc2626' : '#059669') + '">' + p.deliveryDate + '</span></div>' : ''}
+                    </div>`;
+                document.body.appendChild(tooltipEl);
+                const rect = info.el.getBoundingClientRect();
+                tooltipEl.style.top = (rect.bottom + 8) + 'px';
+                tooltipEl.style.left = Math.min(rect.left, window.innerWidth - 300) + 'px';
+            });
+            info.el.addEventListener('mouseleave', function() {
+                if (tooltipEl) { tooltipEl.remove(); tooltipEl = null; }
+            });
+        },
+        eventClick: function(info) {
+            info.jsEvent.preventDefault();
+            if (info.event.url) { Livewire.navigate(info.event.url); }
+        },
+        noEventsText: 'Sin órdenes pendientes para este periodo',
+    });
+    calendar.render();
+    window.addEventListener('scroll', function() { if (tooltipEl) { tooltipEl.remove(); tooltipEl = null; } }, true);
+});
+</script>
+@endpush
+@endif
