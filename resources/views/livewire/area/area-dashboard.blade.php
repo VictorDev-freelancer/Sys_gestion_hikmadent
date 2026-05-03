@@ -200,7 +200,7 @@
                     </div>
                 </div>
                 <div class="p-4" wire:ignore>
-                    <div id="area-calendar" data-events='@json($calendarEvents)'></div>
+                    <div id="area-calendar" x-data="fullcalendar(@js($calendarEvents))"></div>
                 </div>
             </div>
 
@@ -225,67 +225,4 @@
     </div>
 </div>
 
-@script
-<script>
-    // Inicializar calendario si el div existe
-    var el = document.getElementById('area-calendar');
-    if (el && !el.dataset.init) {
-        el.dataset.init = '1';
-        var events = JSON.parse(el.getAttribute('data-events') || '[]');
-        var tt = null;
-        var cal = new FullCalendar.Calendar(el, {
-            initialView: 'dayGridMonth', locale: 'es', firstDay: 1, height: 'auto', events: events,
-            headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' },
-            buttonText: { today: 'Hoy', month: 'Mensual', week: 'Semanal', day: 'Diario' },
-            dayMaxEvents: 3,
-            moreLinkText: function(n) { return '+' + n + ' más'; },
-            eventDidMount: function(info) {
-                info.el.addEventListener('mouseenter', function() {
-                    var p = info.event.extendedProps;
-                    tt = document.createElement('div'); tt.className = 'fc-area-tooltip';
-                    tt.innerHTML = '<b style="color:#4f46e5">' + p.code + '</b>' + (p.isDelayed ? ' <span style="color:red;font-size:11px">⚠️ RETRASADA</span>' : '') + '<br><small>Paciente: ' + (p.patient||'—') + '<br>Doctor: Dr. ' + (p.doctor||'—') + '<br>Estado: ' + p.status + '<br>Responsable: ' + p.technician + '<br>Prioridad: ' + p.priority + (p.deliveryDate ? '<br>Entrega: ' + p.deliveryDate : '') + '</small>';
-                    document.body.appendChild(tt);
-                    var r = info.el.getBoundingClientRect();
-                    tt.style.top = (r.bottom + 8) + 'px'; tt.style.left = Math.min(r.left, window.innerWidth - 300) + 'px';
-                });
-                info.el.addEventListener('mouseleave', function() { if (tt) { tt.remove(); tt = null; } });
-            },
-            eventClick: function(info) { info.jsEvent.preventDefault(); if (info.event.url) Livewire.navigate(info.event.url); },
-        });
-        cal.render();
-    }
-
-    // Re-intentar después de cada actualización de Livewire (cambio Kanban→Calendario)
-    Livewire.hook('morph.updated', ({el}) => {
-        setTimeout(() => {
-            var calEl = document.getElementById('area-calendar');
-            if (calEl && !calEl.dataset.init) {
-                calEl.dataset.init = '1';
-                var evts = JSON.parse(calEl.getAttribute('data-events') || '[]');
-                var tip = null;
-                var c2 = new FullCalendar.Calendar(calEl, {
-                    initialView: 'dayGridMonth', locale: 'es', firstDay: 1, height: 'auto', events: evts,
-                    headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' },
-                    buttonText: { today: 'Hoy', month: 'Mensual', week: 'Semanal', day: 'Diario' },
-                    dayMaxEvents: 3,
-                    moreLinkText: function(n) { return '+' + n + ' más'; },
-                    eventDidMount: function(info) {
-                        info.el.addEventListener('mouseenter', function() {
-                            var p = info.event.extendedProps;
-                            tip = document.createElement('div'); tip.className = 'fc-area-tooltip';
-                            tip.innerHTML = '<b style="color:#4f46e5">' + p.code + '</b><br><small>Paciente: ' + (p.patient||'—') + '<br>Doctor: Dr. ' + (p.doctor||'—') + '<br>Estado: ' + p.status + '</small>';
-                            document.body.appendChild(tip);
-                            var r = info.el.getBoundingClientRect();
-                            tip.style.top = (r.bottom+8)+'px'; tip.style.left = Math.min(r.left, window.innerWidth-300)+'px';
-                        });
-                        info.el.addEventListener('mouseleave', function() { if(tip){tip.remove();tip=null;} });
-                    },
-                    eventClick: function(info) { info.jsEvent.preventDefault(); if(info.event.url) Livewire.navigate(info.event.url); },
-                });
-                c2.render();
-            }
-        }, 150);
-    });
-</script>
-@endscript
 

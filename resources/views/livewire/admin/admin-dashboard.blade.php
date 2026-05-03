@@ -65,7 +65,7 @@
                     </div>
                 </div>
                 <div class="p-4" wire:ignore>
-                    <div id="admin-calendar" data-events='@json($calendarEvents)'></div>
+                    <div id="admin-calendar" x-data="fullcalendar(@js($calendarEvents))"></div>
                 </div>
             </div>
 
@@ -273,35 +273,4 @@
         .fc-event-tooltip { position: fixed; z-index: 9999; background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.12); pointer-events: none; min-width: 240px; max-width: 300px; }
     </style>
 </div>
-
-@script
-<script>
-    var el = document.getElementById('admin-calendar');
-    if (el && !el.dataset.init) {
-        el.dataset.init = '1';
-        var events = JSON.parse(el.getAttribute('data-events') || '[]');
-        var tt = null;
-        var c = new FullCalendar.Calendar(el, {
-            initialView: 'dayGridMonth', locale: 'es', firstDay: 1, height: 'auto', events: events,
-            headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' },
-            buttonText: { today: 'Hoy', month: 'Mensual', week: 'Semanal', day: 'Diario' },
-            dayMaxEvents: 3,
-            moreLinkText: function(n) { return '+' + n + ' más'; },
-            eventDidMount: function(info) {
-                info.el.addEventListener('mouseenter', function() {
-                    var p = info.event.extendedProps;
-                    tt = document.createElement('div'); tt.className = 'fc-event-tooltip';
-                    tt.innerHTML = '<b style="color:#4f46e5">' + p.code + '</b>' + (p.isDelayed ? ' <span style="color:red;font-size:11px">⚠️ RETRASADA</span>' : '') + '<br><small>Paciente: ' + (p.patient||'—') + '<br>Doctor: Dr. ' + (p.doctor||'—') + '<br>Área: ' + p.area + '<br>Estado: ' + p.status + '<br>Prioridad: ' + p.priority + (p.deliveryDate ? '<br>Entrega: ' + p.deliveryDate : '') + '</small>';
-                    document.body.appendChild(tt);
-                    var r = info.el.getBoundingClientRect();
-                    tt.style.top = (r.bottom+8)+'px'; tt.style.left = Math.min(r.left, window.innerWidth-320)+'px';
-                });
-                info.el.addEventListener('mouseleave', function() { if(tt){tt.remove();tt=null;} });
-            },
-            eventClick: function(info) { info.jsEvent.preventDefault(); if(info.event.url) Livewire.navigate(info.event.url); },
-        });
-        c.render();
-    }
-</script>
-@endscript
 
