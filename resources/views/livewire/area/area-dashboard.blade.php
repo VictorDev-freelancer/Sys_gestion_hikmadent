@@ -217,94 +217,95 @@
                     <div id="area-calendar"></div>
                 </div>
             </div>
+
+            {{-- Estilos del calendario --}}
+            <style>
+                #area-calendar .fc { font-family: 'Figtree', ui-sans-serif, system-ui, sans-serif; }
+                #area-calendar .fc-toolbar-title { font-size: 1.25rem !important; font-weight: 700 !important; color: #1f2937 !important; text-transform: capitalize; }
+                #area-calendar .fc-button { background: {{ $area->color }} !important; border-color: {{ $area->color }} !important; font-weight: 600 !important; font-size: 0.8rem !important; padding: 6px 14px !important; border-radius: 8px !important; transition: all 0.15s !important; }
+                #area-calendar .fc-button:hover { filter: brightness(0.85) !important; transform: translateY(-1px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2) !important; }
+                #area-calendar .fc-button-active { filter: brightness(0.75) !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.15) !important; }
+                #area-calendar .fc-today-button { background: #059669 !important; border-color: #047857 !important; }
+                #area-calendar .fc-day-today { background: {{ $area->color }}10 !important; }
+                #area-calendar .fc-daygrid-day-number { font-weight: 600; color: #374151; padding: 6px 10px !important; }
+                #area-calendar .fc-day-today .fc-daygrid-day-number { background: {{ $area->color }}; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
+                #area-calendar .fc-event { border-radius: 6px !important; padding: 2px 6px !important; font-size: 0.72rem !important; font-weight: 600 !important; cursor: pointer !important; border-width: 2px !important; transition: transform 0.1s, box-shadow 0.1s !important; }
+                #area-calendar .fc-event:hover { transform: scale(1.02); box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important; z-index: 10 !important; }
+                #area-calendar .fc-col-header-cell { background: #f9fafb; font-weight: 700 !important; text-transform: uppercase !important; font-size: 0.7rem !important; color: #6b7280 !important; padding: 10px 0 !important; }
+                #area-calendar .fc-popover { border-radius: 12px !important; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15) !important; border: 1px solid #e5e7eb !important; }
+                #area-calendar .fc-popover-header { background: {{ $area->color }} !important; color: white !important; border-radius: 12px 12px 0 0 !important; font-weight: 700 !important; padding: 8px 12px !important; }
+                .fc-area-tooltip { position: fixed; z-index: 9999; background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.12); pointer-events: none; min-width: 220px; max-width: 280px; }
+            </style>
+
+            {{-- Carga dinámica de FullCalendar --}}
+            <script>
+            (function() {
+                function initAreaCalendar() {
+                    const calendarEl = document.getElementById('area-calendar');
+                    if (!calendarEl || calendarEl.dataset.initialized) return;
+                    calendarEl.dataset.initialized = 'true';
+
+                    const events = @json($calendarEvents);
+                    let tooltipEl = null;
+
+                    const calendar = new FullCalendar.Calendar(calendarEl, {
+                        initialView: 'dayGridMonth',
+                        locale: 'es',
+                        firstDay: 1,
+                        height: 'auto',
+                        events: events,
+                        headerToolbar: {
+                            left: 'prev,next today',
+                            center: 'title',
+                            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                        },
+                        buttonText: { today: 'Hoy', month: '📅 Mensual', week: '📆 Semanal', day: '🕐 Diario' },
+                        dayMaxEvents: 3,
+                        moreLinkText: function(num) { return '+' + num + ' más'; },
+                        eventDidMount: function(info) {
+                            info.el.addEventListener('mouseenter', function(e) {
+                                const p = info.event.extendedProps;
+                                tooltipEl = document.createElement('div');
+                                tooltipEl.className = 'fc-area-tooltip';
+                                tooltipEl.innerHTML = '<div style="margin-bottom:8px"><span style="font-family:monospace;font-weight:800;color:#4f46e5;font-size:0.9rem">' + p.code + '</span>' + (p.isDelayed ? ' <span style="background:#fee2e2;color:#991b1b;font-size:0.65rem;font-weight:700;padding:2px 6px;border-radius:9999px;margin-left:6px">⚠️ RETRASADA</span>' : '') + '</div><div style="display:grid;gap:4px;font-size:0.78rem"><div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Paciente</span><span style="color:#1f2937;font-weight:600">' + (p.patient || '—') + '</span></div><div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Doctor</span><span style="color:#1f2937;font-weight:600">Dr. ' + (p.doctor || '—') + '</span></div><div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Estado</span><span style="font-weight:600;color:#374151">' + p.status + '</span></div><div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Responsable</span><span style="font-weight:600;color:#374151">' + p.technician + '</span></div><div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Prioridad</span><span style="font-weight:600;color:' + (p.priorityVal === 'urgent' ? '#dc2626' : '#374151') + '">' + p.priority + '</span></div>' + (p.deliveryDate ? '<div style="display:flex;justify-content:space-between;padding-top:4px;border-top:1px solid #f3f4f6"><span style="color:#9ca3af">Entrega</span><span style="font-weight:700;color:' + (p.isDelayed ? '#dc2626' : '#059669') + '">' + p.deliveryDate + '</span></div>' : '') + '</div>';
+                                document.body.appendChild(tooltipEl);
+                                const rect = info.el.getBoundingClientRect();
+                                tooltipEl.style.top = (rect.bottom + 8) + 'px';
+                                tooltipEl.style.left = Math.min(rect.left, window.innerWidth - 300) + 'px';
+                            });
+                            info.el.addEventListener('mouseleave', function() {
+                                if (tooltipEl) { tooltipEl.remove(); tooltipEl = null; }
+                            });
+                        },
+                        eventClick: function(info) {
+                            info.jsEvent.preventDefault();
+                            if (info.event.url) { Livewire.navigate(info.event.url); }
+                        },
+                        noEventsText: 'Sin órdenes pendientes para este periodo',
+                    });
+                    calendar.render();
+                    window.addEventListener('scroll', function() { if (tooltipEl) { tooltipEl.remove(); tooltipEl = null; } }, true);
+                }
+
+                // Cargar FullCalendar CDN si no está cargado
+                if (typeof FullCalendar === 'undefined') {
+                    var link = document.createElement('link');
+                    link.rel = 'stylesheet';
+                    link.href = 'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css';
+                    document.head.appendChild(link);
+
+                    var script = document.createElement('script');
+                    script.src = 'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js';
+                    script.onload = function() { initAreaCalendar(); };
+                    document.head.appendChild(script);
+                } else {
+                    initAreaCalendar();
+                }
+            })();
+            </script>
             @endif
 
         </div>
     </div>
 </div>
 
-{{-- FullCalendar CDN (solo carga si vista = calendar) --}}
-@if($view === 'calendar')
-@push('scripts')
-<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
-
-<style>
-    #area-calendar .fc { font-family: 'Figtree', ui-sans-serif, system-ui, sans-serif; }
-    #area-calendar .fc-toolbar-title { font-size: 1.25rem !important; font-weight: 700 !important; color: #1f2937 !important; text-transform: capitalize; }
-    #area-calendar .fc-button { background: {{ $area->color }} !important; border-color: {{ $area->color }} !important; font-weight: 600 !important; font-size: 0.8rem !important; padding: 6px 14px !important; border-radius: 8px !important; transition: all 0.15s !important; }
-    #area-calendar .fc-button:hover { filter: brightness(0.85) !important; transform: translateY(-1px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2) !important; }
-    #area-calendar .fc-button-active { filter: brightness(0.75) !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.15) !important; }
-    #area-calendar .fc-today-button { background: #059669 !important; border-color: #047857 !important; }
-    #area-calendar .fc-day-today { background: {{ $area->color }}10 !important; }
-    #area-calendar .fc-daygrid-day-number { font-weight: 600; color: #374151; padding: 6px 10px !important; }
-    #area-calendar .fc-day-today .fc-daygrid-day-number { background: {{ $area->color }}; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
-    #area-calendar .fc-event { border-radius: 6px !important; padding: 2px 6px !important; font-size: 0.72rem !important; font-weight: 600 !important; cursor: pointer !important; border-width: 2px !important; transition: transform 0.1s, box-shadow 0.1s !important; }
-    #area-calendar .fc-event:hover { transform: scale(1.02); box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important; z-index: 10 !important; }
-    #area-calendar .fc-col-header-cell { background: #f9fafb; font-weight: 700 !important; text-transform: uppercase !important; font-size: 0.7rem !important; color: #6b7280 !important; padding: 10px 0 !important; }
-    #area-calendar .fc-popover { border-radius: 12px !important; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15) !important; border: 1px solid #e5e7eb !important; }
-    #area-calendar .fc-popover-header { background: {{ $area->color }} !important; color: white !important; border-radius: 12px 12px 0 0 !important; font-weight: 700 !important; padding: 8px 12px !important; }
-    .fc-area-tooltip { position: fixed; z-index: 9999; background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.12); pointer-events: none; min-width: 220px; max-width: 280px; }
-</style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const calendarEl = document.getElementById('area-calendar');
-    if (!calendarEl) return;
-
-    const events = @json($calendarEvents);
-    let tooltipEl = null;
-
-    const calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        locale: 'es',
-        firstDay: 1,
-        height: 'auto',
-        events: events,
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay'
-        },
-        buttonText: { today: 'Hoy', month: '📅 Mensual', week: '📆 Semanal', day: '🕐 Diario' },
-        dayMaxEvents: 3,
-        moreLinkText: function(num) { return '+' + num + ' más'; },
-        eventDidMount: function(info) {
-            info.el.addEventListener('mouseenter', function(e) {
-                const p = info.event.extendedProps;
-                tooltipEl = document.createElement('div');
-                tooltipEl.className = 'fc-area-tooltip';
-                tooltipEl.innerHTML = `
-                    <div style="margin-bottom:8px">
-                        <span style="font-family:monospace;font-weight:800;color:#4f46e5;font-size:0.9rem">${p.code}</span>
-                        ${p.isDelayed ? '<span style="background:#fee2e2;color:#991b1b;font-size:0.65rem;font-weight:700;padding:2px 6px;border-radius:9999px;margin-left:6px">⚠️ RETRASADA</span>' : ''}
-                    </div>
-                    <div style="display:grid;gap:4px;font-size:0.78rem">
-                        <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Paciente</span><span style="color:#1f2937;font-weight:600">${p.patient || '—'}</span></div>
-                        <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Doctor</span><span style="color:#1f2937;font-weight:600">Dr. ${p.doctor || '—'}</span></div>
-                        <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Estado</span><span style="font-weight:600;color:#374151">${p.status}</span></div>
-                        <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Responsable</span><span style="font-weight:600;color:#374151">${p.technician}</span></div>
-                        <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Prioridad</span><span style="font-weight:600;color:${p.priorityVal === 'urgent' ? '#dc2626' : '#374151'}">${p.priority}</span></div>
-                        ${p.deliveryDate ? '<div style="display:flex;justify-content:space-between;padding-top:4px;border-top:1px solid #f3f4f6"><span style="color:#9ca3af">Entrega</span><span style="font-weight:700;color:' + (p.isDelayed ? '#dc2626' : '#059669') + '">' + p.deliveryDate + '</span></div>' : ''}
-                    </div>`;
-                document.body.appendChild(tooltipEl);
-                const rect = info.el.getBoundingClientRect();
-                tooltipEl.style.top = (rect.bottom + 8) + 'px';
-                tooltipEl.style.left = Math.min(rect.left, window.innerWidth - 300) + 'px';
-            });
-            info.el.addEventListener('mouseleave', function() {
-                if (tooltipEl) { tooltipEl.remove(); tooltipEl = null; }
-            });
-        },
-        eventClick: function(info) {
-            info.jsEvent.preventDefault();
-            if (info.event.url) { Livewire.navigate(info.event.url); }
-        },
-        noEventsText: 'Sin órdenes pendientes para este periodo',
-    });
-    calendar.render();
-    window.addEventListener('scroll', function() { if (tooltipEl) { tooltipEl.remove(); tooltipEl = null; } }, true);
-});
-</script>
-@endpush
-@endif
