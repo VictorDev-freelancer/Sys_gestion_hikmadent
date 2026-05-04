@@ -32,5 +32,15 @@ class AppServiceProvider extends ServiceProvider
     {
         WorkOrder::observe(WorkOrderObserver::class);
         WorkOrderArea::observe(WorkOrderAreaObserver::class);
+
+        // Bypass Nginx static file 404 errors by changing the Livewire JS route
+        // so it doesn't end in '.js'
+        \Livewire\Livewire::setScriptRoute(function ($handle) {
+            return \Illuminate\Support\Facades\Route::get('/livewire-script', $handle);
+        });
+        
+        \Livewire\Livewire::setUpdateRoute(function ($handle) {
+            return \Illuminate\Support\Facades\Route::post('/livewire-update', $handle);
+        });
     }
 }
