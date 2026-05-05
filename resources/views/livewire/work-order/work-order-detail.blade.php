@@ -136,6 +136,8 @@
                             <div class="flex flex-wrap gap-2 items-center">
                                 @php
                                     $currentIndex = -1;
+                                    $isCurrentKanbanCompleted = false;
+                                    
                                     if ($workOrder->status->value !== 'completed') {
                                         foreach($workOrder->planned_route as $i => $s) {
                                             if ($s['area_id'] == $workOrder->current_area_id) {
@@ -143,31 +145,43 @@
                                                 break;
                                             }
                                         }
+                                        
+                                        $currentWoa = $workOrder->workOrderAreas->where('area_id', $workOrder->current_area_id)->first();
+                                        if ($currentWoa && $currentWoa->kanban_status->value === 'completed') {
+                                            $isCurrentKanbanCompleted = true;
+                                        }
                                     }
                                 @endphp
                                 @foreach($workOrder->planned_route as $index => $step)
                                     @php
                                         $stepArea = \App\Models\Area::find($step['area_id']);
                                         $stepTech = !empty($step['technician_id']) ? \App\Models\User::find($step['technician_id']) : null;
+                                        
                                         $isCurrent = $workOrder->current_area_id == $step['area_id'] && $workOrder->status->value !== 'completed';
-                                        $isCompleted = $workOrder->status->value === 'completed' || ($currentIndex !== -1 && $index < $currentIndex);
+                                        
+                                        $isCompleted = $workOrder->status->value === 'completed' 
+                                                       || ($currentIndex !== -1 && $index < $currentIndex) 
+                                                       || ($isCurrent && $isCurrentKanbanCompleted);
                                         
                                         $bgClass = 'bg-white border-gray-200';
-                                        if ($isCurrent) $bgClass = 'bg-pink-100 border-pink-400 shadow-sm ring-2 ring-pink-200';
-                                        elseif ($isCompleted) $bgClass = 'bg-green-100 border-green-400';
+                                        if ($isCompleted) {
+                                            $bgClass = 'bg-green-100 border-green-400';
+                                        } elseif ($isCurrent) {
+                                            $bgClass = 'bg-pink-100 border-pink-400 shadow-sm ring-2 ring-pink-200';
+                                        }
                                     @endphp
                                     @if($stepArea)
                                         <div class="flex items-center">
                                             <div class="px-3 py-2 rounded border {{ $bgClass }}">
-                                                <div class="text-xs font-bold {{ $isCompleted && !$isCurrent ? 'text-green-600' : 'text-gray-500' }} mb-0.5">
+                                                <div class="text-xs font-bold {{ $isCompleted ? 'text-green-600' : 'text-gray-500' }} mb-0.5">
                                                     PASO {{ $index + 1 }}
-                                                    @if($isCompleted && !$isCurrent)
+                                                    @if($isCompleted)
                                                         <svg class="inline w-3 h-3 ml-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                                         </svg>
                                                     @endif
                                                 </div>
-                                                <div class="font-bold {{ $isCurrent ? 'text-pink-700' : ($isCompleted ? 'text-green-800' : 'text-gray-800') }}">
+                                                <div class="font-bold {{ $isCompleted ? 'text-green-800' : ($isCurrent ? 'text-pink-700' : 'text-gray-800') }}">
                                                     {{ $stepArea->name }}
                                                 </div>
                                                 @if($stepTech)
