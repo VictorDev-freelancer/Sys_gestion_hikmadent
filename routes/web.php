@@ -70,7 +70,7 @@ Route::middleware([
         ->name('work-orders.show');
         
     Route::get('/ordenes/{workOrder}/imprimir', function (\App\Models\WorkOrder $workOrder) {
-        $workOrder->load(['patient', 'doctor', 'currentArea', 'assignedTpd', 'workOrderAreas.area', 'workOrderAreas.stages.areaStage']);
+        $workOrder->load(['currentArea', 'assignedTpd', 'workOrderAreas.area', 'workOrderAreas.stages.areaStage']);
         return view('print.work-order', compact('workOrder'));
     })->name('work-orders.print');
 
