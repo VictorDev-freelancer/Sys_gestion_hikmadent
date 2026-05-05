@@ -64,9 +64,9 @@ class WorkOrderForm extends Component
 
     // Asignaciones
     public ?int $assigned_tpd_id = null;
-    public ?int $initial_area_id = null;
-    public ?int $area_supervisor_id = null;
-    public ?int $area_technician_id = null;
+    
+    // Ruta Planificada
+    public array $planned_route = [];
 
     public function mount(?int $workOrderId = null): void
     {
@@ -76,7 +76,24 @@ class WorkOrderForm extends Component
             $this->workOrderId = $workOrderId;
             $workOrder = WorkOrder::with('client')->findOrFail($workOrderId);
             $this->fillFromWorkOrder($workOrder);
+        } else {
+            // Iniciar con un paso vacío por defecto
+            $this->addRouteStep();
         }
+    }
+
+    public function addRouteStep(): void
+    {
+        $this->planned_route[] = [
+            'area_id' => '',
+            'technician_id' => ''
+        ];
+    }
+
+    public function removeRouteStep(int $index): void
+    {
+        unset($this->planned_route[$index]);
+        $this->planned_route = array_values($this->planned_route);
     }
 
     private function fillFromWorkOrder(WorkOrder $wo): void
@@ -96,6 +113,7 @@ class WorkOrderForm extends Component
         $this->clinic_delivery_date  = $wo->clinic_delivery_date?->format('Y-m-d');
         $this->delivery_date         = $wo->delivery_date?->format('Y-m-d');
         $this->assigned_tpd_id       = $wo->assigned_tpd_id;
+        $this->planned_route         = $wo->planned_route ?? [];
 
         if ($wo->client) {
             $this->client_name  = $wo->client->name;
@@ -112,6 +130,7 @@ class WorkOrderForm extends Component
             'prosthetic_type' => 'required|string',
             'quantity'       => 'required|integer|min:1',
             'priority'       => 'required|string',
+            'planned_route.*.area_id' => 'required_with:planned_route.*.technician_id',
         ]);
 
         $service = app(WorkOrderService::class);
@@ -126,6 +145,9 @@ class WorkOrderForm extends Component
                 'clinic_name' => $this->clinic_name ?: null,
             ]
         );
+
+        // Limpiar pasos vacíos en la ruta planificada
+        $cleanRoute = array_values(array_filter($this->planned_route, fn($step) => !empty($step['area_id'])));
 
         $data = [
             'client_id'            => $client->id,
@@ -144,6 +166,7 @@ class WorkOrderForm extends Component
             'clinic_delivery_date' => $this->clinic_delivery_date ?: null,
             'delivery_date'        => $this->delivery_date ?: null,
             'assigned_tpd_id'      => $this->assigned_tpd_id,
+            'planned_route'        => empty($cleanRoute) ? null : $cleanRoute,
         ];
 
         if ($this->workOrderId) {
@@ -153,14 +176,17 @@ class WorkOrderForm extends Component
         } else {
             $workOrder = $service->create($data);
 
-            // Si se seleccionó un área inicial, asignar
-            if ($this->initial_area_id) {
-                $area = Area::findOrFail($this->initial_area_id);
+            // Si se definió una ruta planificada, transferir al primer paso automáticamente
+            if (!empty($cleanRoute)) {
+                $firstStep = $cleanRoute[0];
+                $area = Area::findOrFail($firstStep['area_id']);
+                $techId = !empty($firstStep['technician_id']) ? $firstStep['technician_id'] : null;
+                
                 $service->assignToArea(
                     $workOrder,
                     $area,
-                    $this->area_technician_id,
-                    $this->area_supervisor_id,
+                    $techId,
+                    null // Supervisor (puede ser manejado por el servicio o null por ahora)
                 );
             }
 

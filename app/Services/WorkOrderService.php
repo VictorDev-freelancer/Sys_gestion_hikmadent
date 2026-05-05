@@ -184,6 +184,47 @@ class WorkOrderService
         });
     }
 
+    /**
+     * Verifica la ruta planificada y transfiere la orden al siguiente paso automáticamente.
+     * Si no hay más pasos, marca la orden completa globalmente.
+     */
+    public function handleAutoTransfer(WorkOrder $workOrder): void
+    {
+        $route = $workOrder->planned_route;
+
+        if (empty($route)) {
+            return;
+        }
+
+        $currentAreaId = $workOrder->current_area_id;
+        $currentIndex = -1;
+
+        foreach ($route as $index => $step) {
+            if ($step['area_id'] == $currentAreaId) {
+                $currentIndex = $index;
+                break;
+            }
+        }
+
+        if ($currentIndex !== -1 && isset($route[$currentIndex + 1])) {
+            $nextStep = $route[$currentIndex + 1];
+            $targetArea = Area::findOrFail($nextStep['area_id']);
+            $techId = !empty($nextStep['technician_id']) ? $nextStep['technician_id'] : null;
+
+            $this->transferToArea(
+                $workOrder,
+                $targetArea,
+                $techId,
+                null,
+                'Transferencia automática por Workflow'
+            );
+        } else {
+            if ($workOrder->status !== WorkOrderStatus::COMPLETED) {
+                $this->complete($workOrder);
+            }
+        }
+    }
+
     /* ================================================================== */
     /*  5. CHECKLIST — Completar etapas                                    */
     /* ================================================================== */

@@ -83,7 +83,7 @@ class AreaDashboard extends Component
     }
 
     /**
-     * Confirmar entrega: mueve la orden al historial.
+     * Confirmar entrega: mueve la orden al historial y transfiere al siguiente paso del workflow.
      * Se marca como 'delivered' (entregada) y se registra en trazabilidad.
      */
     public function confirmDelivery(int $workOrderAreaId): void
@@ -108,6 +108,10 @@ class AreaDashboard extends Component
             'from_status'   => $woa->workOrder->status->value,
             'to_status'     => $woa->workOrder->status->value,
         ]);
+
+        // Transferencia automática según Ruta Planificada
+        $service = app(WorkOrderService::class);
+        $service->handleAutoTransfer($woa->workOrder);
     }
 
     /* ── WebSockets ── */

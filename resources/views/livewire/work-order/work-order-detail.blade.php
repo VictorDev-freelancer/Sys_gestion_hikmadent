@@ -121,6 +121,49 @@
                 {{-- COLUMNA DERECHA: Recorrido + Trazabilidad --}}
                 <div class="lg:col-span-2 space-y-6">
 
+                    {{-- Ruta Planificada (Workflow) --}}
+                    @if(!empty($workOrder->planned_route))
+                    <div class="bg-white shadow-xl rounded-lg overflow-hidden border border-pink-100">
+                        <div class="bg-pink-600 px-4 py-3 flex justify-between items-center">
+                            <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center">
+                                <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                                Ruta Planificada (Workflow)
+                            </h3>
+                        </div>
+                        <div class="p-4 bg-pink-50/30">
+                            <div class="flex flex-wrap gap-2 items-center">
+                                @foreach($workOrder->planned_route as $index => $step)
+                                    @php
+                                        $stepArea = \App\Models\Area::find($step['area_id']);
+                                        $stepTech = !empty($step['technician_id']) ? \App\Models\User::find($step['technician_id']) : null;
+                                        $isCurrent = $workOrder->current_area_id == $step['area_id'];
+                                    @endphp
+                                    @if($stepArea)
+                                        <div class="flex items-center">
+                                            <div class="px-3 py-2 rounded border {{ $isCurrent ? 'bg-pink-100 border-pink-400 shadow-sm ring-2 ring-pink-200' : 'bg-white border-gray-200' }}">
+                                                <div class="text-xs font-bold text-gray-500 mb-0.5">PASO {{ $index + 1 }}</div>
+                                                <div class="font-bold {{ $isCurrent ? 'text-pink-700' : 'text-gray-800' }}">
+                                                    {{ $stepArea->name }}
+                                                </div>
+                                                @if($stepTech)
+                                                    <div class="text-xs text-gray-500 mt-1">Técnico: {{ $stepTech->name }}</div>
+                                                @endif
+                                            </div>
+                                            @if(!$loop->last)
+                                                <svg class="h-5 w-5 text-gray-400 mx-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                                </svg>
+                                            @endif
+                                        </div>
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
                     {{-- Recorrido por Áreas (Checklist) --}}
                     <div class="bg-white shadow-xl rounded-lg overflow-hidden">
                         <div class="bg-violet-600 px-4 py-3">

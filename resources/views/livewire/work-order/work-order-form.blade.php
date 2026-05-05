@@ -148,55 +148,80 @@
                     </div>
                 </div>
 
-                {{-- SECCIÓN 5: Asignaciones --}}
+                {{-- SECCIÓN 5: Asignación y Workflow --}}
                 <div class="bg-white shadow-xl rounded-lg mb-6 overflow-hidden">
                     <div class="bg-pink-600 px-6 py-3">
                         <h3 class="text-lg font-bold text-white flex items-center">
                             <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
-                            Asignación
+                            Asignación Global y Flujo de Trabajo (Ruta)
                         </h3>
                     </div>
-                    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div>
-                            <label for="assigned_tpd_id" class="block text-sm font-bold text-gray-700 mb-1">TPD Responsable</label>
+                    <div class="p-6">
+                        <div class="mb-6 max-w-md">
+                            <label for="assigned_tpd_id" class="block text-sm font-bold text-gray-700 mb-1">TPD Responsable (Global)</label>
                             <select wire:model="assigned_tpd_id" id="assigned_tpd_id" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full bg-white">
-                                <option value="">Seleccionar TPD...</option>
+                                <option value="">Seleccionar TPD Responsable del Proyecto...</option>
                                 @foreach($technicians as $tech)
                                     <option value="{{ $tech->id }}">{{ $tech->name }}</option>
                                 @endforeach
                             </select>
                         </div>
-                        <div>
-                            <label for="initial_area_id" class="block text-sm font-bold text-gray-700 mb-1">Área Inicial (opcional)</label>
-                            <select wire:model="initial_area_id" id="initial_area_id" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full bg-white">
-                                <option value="">Sin asignar aún</option>
-                                @foreach($areas as $area)
-                                    <option value="{{ $area->id }}">{{ $area->name }}</option>
-                                @endforeach
-                            </select>
+
+                        <hr class="mb-6">
+
+                        <h4 class="text-md font-bold text-gray-800 mb-4">Ruta Planificada de Áreas</h4>
+                        <p class="text-sm text-gray-500 mb-4">Define el orden en que las áreas procesarán este trabajo. Al completar un paso, pasará automáticamente al siguiente.</p>
+
+                        <div class="space-y-4">
+                            @foreach($planned_route as $index => $step)
+                                <div class="flex items-start space-x-4 bg-gray-50 p-4 rounded-lg border border-gray-200" wire:key="route-step-{{ $index }}">
+                                    <div class="pt-2">
+                                        <span class="bg-gray-800 text-white font-bold rounded-full w-6 h-6 flex items-center justify-center text-xs">
+                                            {{ $index + 1 }}
+                                        </span>
+                                    </div>
+                                    <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-xs font-bold text-gray-700 mb-1">Área</label>
+                                            <select wire:model="planned_route.{{ $index }}.area_id" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full bg-white text-sm">
+                                                <option value="">Seleccionar área...</option>
+                                                @foreach($areas as $area)
+                                                    <option value="{{ $area->id }}">{{ $area->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-bold text-gray-700 mb-1">Técnico Asignado (opcional)</label>
+                                            <select wire:model="planned_route.{{ $index }}.technician_id" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full bg-white text-sm">
+                                                <option value="">Cualquier técnico del área</option>
+                                                @foreach($technicians as $tech)
+                                                    <option value="{{ $tech->id }}">{{ $tech->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="pt-6">
+                                        <button type="button" wire:click="removeRouteStep({{ $index }})" class="text-red-500 hover:text-red-700" title="Eliminar paso">
+                                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
-                        @if($initial_area_id)
-                        <div>
-                            <label for="area_supervisor_id" class="block text-sm font-bold text-gray-700 mb-1">Doctor/Supervisor del Área</label>
-                            <select wire:model="area_supervisor_id" id="area_supervisor_id" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full bg-white">
-                                <option value="">Sin supervisor</option>
-                                @foreach($technicians as $tech)
-                                    <option value="{{ $tech->id }}">{{ $tech->name }}</option>
-                                @endforeach
-                            </select>
+
+                        <div class="mt-4">
+                            <button type="button" wire:click="addRouteStep" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700 focus:outline-none">
+                                <svg class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                </svg>
+                                Añadir siguiente paso
+                            </button>
                         </div>
-                        <div>
-                            <label for="area_technician_id" class="block text-sm font-bold text-gray-700 mb-1">Técnico del Área</label>
-                            <select wire:model="area_technician_id" id="area_technician_id" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full bg-white">
-                                <option value="">Sin técnico asignado</option>
-                                @foreach($technicians as $tech)
-                                    <option value="{{ $tech->id }}">{{ $tech->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        @endif
+
                     </div>
                 </div>
 
