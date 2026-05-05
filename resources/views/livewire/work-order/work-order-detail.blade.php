@@ -75,6 +75,10 @@
                             @endif
                             @endhasanyrole
 
+                            <a href="{{ route('work-orders.print', $workOrder) }}" target="_blank" class="w-full flex items-center justify-center px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white rounded-lg text-sm font-medium transition shadow-sm">
+                                <span class="mr-2">🖨️</span> Imprimir Orden
+                            </a>
+
                             @if(in_array($workOrder->status->value, ['registered', 'in_progress']))
                                 <button wire:click="openTransferModal" class="w-full px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition">
                                     Transferir a Área

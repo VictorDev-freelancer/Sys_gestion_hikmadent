@@ -171,9 +171,14 @@
                                     {{ $order->created_at->format('d/m/Y') }}
                                 </td>
                                 <td class="px-4 py-3 whitespace-nowrap text-right text-sm">
-                                    <a href="{{ route('work-orders.show', $order) }}" class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 border border-indigo-200 rounded px-3 py-1" wire:navigate>
-                                        Ver
-                                    </a>
+                                    <div class="flex justify-end space-x-2">
+                                        <a href="{{ route('work-orders.show', $order) }}" class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 border border-indigo-200 rounded px-3 py-1" wire:navigate>
+                                            Ver
+                                        </a>
+                                        <a href="{{ route('work-orders.print', $order) }}" target="_blank" class="text-gray-600 hover:text-gray-900 bg-gray-50 border border-gray-200 rounded px-3 py-1" title="Imprimir Orden">
+                                            🖨️
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                             @empty

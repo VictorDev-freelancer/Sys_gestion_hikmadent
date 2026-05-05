@@ -68,6 +68,11 @@ Route::middleware([
     // --------------------------------------------------------
     Route::get('/ordenes/{workOrder}', WorkOrderDetail::class)
         ->name('work-orders.show');
+        
+    Route::get('/ordenes/{workOrder}/imprimir', function (\App\Models\WorkOrder $workOrder) {
+        $workOrder->load(['patient', 'doctor', 'currentArea', 'assignedTpd', 'workOrderAreas.area', 'workOrderAreas.stages.areaStage']);
+        return view('print.work-order', compact('workOrder'));
+    })->name('work-orders.print');
 
     // --------------------------------------------------------
     // DASHBOARD POR ÁREA (acceso por slug)
