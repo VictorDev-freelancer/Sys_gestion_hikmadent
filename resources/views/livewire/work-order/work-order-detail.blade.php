@@ -134,17 +134,40 @@
                         </div>
                         <div class="p-4 bg-pink-50/30">
                             <div class="flex flex-wrap gap-2 items-center">
+                                @php
+                                    $currentIndex = -1;
+                                    if ($workOrder->status->value !== 'completed') {
+                                        foreach($workOrder->planned_route as $i => $s) {
+                                            if ($s['area_id'] == $workOrder->current_area_id) {
+                                                $currentIndex = $i;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                @endphp
                                 @foreach($workOrder->planned_route as $index => $step)
                                     @php
                                         $stepArea = \App\Models\Area::find($step['area_id']);
                                         $stepTech = !empty($step['technician_id']) ? \App\Models\User::find($step['technician_id']) : null;
-                                        $isCurrent = $workOrder->current_area_id == $step['area_id'];
+                                        $isCurrent = $workOrder->current_area_id == $step['area_id'] && $workOrder->status->value !== 'completed';
+                                        $isCompleted = $workOrder->status->value === 'completed' || ($currentIndex !== -1 && $index < $currentIndex);
+                                        
+                                        $bgClass = 'bg-white border-gray-200';
+                                        if ($isCurrent) $bgClass = 'bg-pink-100 border-pink-400 shadow-sm ring-2 ring-pink-200';
+                                        elseif ($isCompleted) $bgClass = 'bg-green-100 border-green-400';
                                     @endphp
                                     @if($stepArea)
                                         <div class="flex items-center">
-                                            <div class="px-3 py-2 rounded border {{ $isCurrent ? 'bg-pink-100 border-pink-400 shadow-sm ring-2 ring-pink-200' : 'bg-white border-gray-200' }}">
-                                                <div class="text-xs font-bold text-gray-500 mb-0.5">PASO {{ $index + 1 }}</div>
-                                                <div class="font-bold {{ $isCurrent ? 'text-pink-700' : 'text-gray-800' }}">
+                                            <div class="px-3 py-2 rounded border {{ $bgClass }}">
+                                                <div class="text-xs font-bold {{ $isCompleted && !$isCurrent ? 'text-green-600' : 'text-gray-500' }} mb-0.5">
+                                                    PASO {{ $index + 1 }}
+                                                    @if($isCompleted && !$isCurrent)
+                                                        <svg class="inline w-3 h-3 ml-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                    @endif
+                                                </div>
+                                                <div class="font-bold {{ $isCurrent ? 'text-pink-700' : ($isCompleted ? 'text-green-800' : 'text-gray-800') }}">
                                                     {{ $stepArea->name }}
                                                 </div>
                                                 @if($stepTech)
