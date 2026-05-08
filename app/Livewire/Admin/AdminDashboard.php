@@ -123,7 +123,7 @@ class AdminDashboard extends Component
                 return [
                     'label' => $item->prosthetic_type instanceof \App\Enums\ProstheticType 
                                 ? $item->prosthetic_type->label() 
-                                : \App\Enums\ProstheticType::from($item->prosthetic_type)->label(),
+                                : (\App\Enums\ProstheticType::tryFrom($item->prosthetic_type)?->label() ?? 'Otro/Catálogo'),
                     'total' => $item->total,
                 ];
             });
