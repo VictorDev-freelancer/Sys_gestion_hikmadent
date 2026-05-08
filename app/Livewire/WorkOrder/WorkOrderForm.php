@@ -70,7 +70,9 @@ class WorkOrderForm extends Component
 
     // Asignaciones
     public ?int $assigned_tpd_id = null;
-    
+    // Trabajos extras
+    public array $extra_works = [];
+
     // Ruta Planificada
     public array $planned_route = [];
 
@@ -89,18 +91,45 @@ class WorkOrderForm extends Component
         $this->calculatePrice();
     }
 
+    public function updatedExtraWorks()
+    {
+        $this->calculatePrice();
+    }
+
+    public function addExtraWork(): void
+    {
+        $this->extra_works[] = [
+            'description' => '',
+            'price' => 0
+        ];
+    }
+
+    public function removeExtraWork(int $index): void
+    {
+        unset($this->extra_works[$index]);
+        $this->extra_works = array_values($this->extra_works);
+        $this->calculatePrice();
+    }
+
     private function calculatePrice()
     {
+        $baseTotal = 0;
         if ($this->catalog_item_id) {
             $item = \App\Models\CatalogItem::find($this->catalog_item_id);
             if ($item) {
                 $this->unit_price = $this->client_type === 'student' ? $item->price_student : $item->price_regular;
-                $this->total_price = $this->unit_price * $this->quantity;
+                $baseTotal = $this->unit_price * $this->quantity;
             }
         } else {
             $this->unit_price = 0;
-            $this->total_price = 0;
         }
+
+        $extrasTotal = 0;
+        foreach ($this->extra_works as $extra) {
+            $extrasTotal += floatval($extra['price'] ?? 0);
+        }
+
+        $this->total_price = $baseTotal + $extrasTotal;
     }
 
     public function mount(?int $workOrderId = null): void
@@ -152,6 +181,7 @@ class WorkOrderForm extends Component
         $this->delivery_date         = $wo->delivery_date?->format('Y-m-d');
         $this->assigned_tpd_id       = $wo->assigned_tpd_id;
         $this->planned_route         = $wo->planned_route ?? [];
+        $this->extra_works           = $wo->extra_works ?? [];
 
         if ($wo->client) {
             $this->client_name  = $wo->client->name;
@@ -170,6 +200,8 @@ class WorkOrderForm extends Component
             'quantity'       => 'required|integer|min:1',
             'priority'       => 'required|string',
             'planned_route.*.area_id' => 'required_with:planned_route.*.technician_id',
+            'extra_works.*.description' => 'required|string|max:255',
+            'extra_works.*.price'       => 'required|numeric|min:0',
         ]);
 
         $service = app(WorkOrderService::class);
@@ -187,6 +219,9 @@ class WorkOrderForm extends Component
 
         // Limpiar pasos vacíos en la ruta planificada
         $cleanRoute = array_values(array_filter($this->planned_route, fn($step) => !empty($step['area_id'])));
+
+        // Limpiar trabajos extras vacíos
+        $cleanExtras = array_values(array_filter($this->extra_works, fn($extra) => !empty(trim($extra['description']))));
 
         $data = [
             'client_id'            => $client->id,
@@ -210,6 +245,7 @@ class WorkOrderForm extends Component
             'delivery_date'        => $this->delivery_date ?: null,
             'assigned_tpd_id'      => $this->assigned_tpd_id,
             'planned_route'        => empty($cleanRoute) ? null : $cleanRoute,
+            'extra_works'          => empty($cleanExtras) ? null : $cleanExtras,
         ];
 
         if ($this->workOrderId) {

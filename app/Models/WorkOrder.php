@@ -57,6 +57,7 @@ class WorkOrder extends Model
         'delivery_date',
         'current_area_id',
         'planned_route',
+        'extra_works',
     ];
 
     protected function casts(): array
@@ -75,6 +76,7 @@ class WorkOrder extends Model
             'clinic_delivery_date' => 'date',
             'delivery_date'        => 'date',
             'planned_route'        => 'array',
+            'extra_works'          => 'array',
         ];
     }
 

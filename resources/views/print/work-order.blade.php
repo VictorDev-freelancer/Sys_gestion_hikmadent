@@ -109,9 +109,24 @@
                     <span class="info-label">Cantidad:</span>
                     <span class="info-value">{{ $workOrder->quantity ?? 1 }}</span>
                 </div>
+
+                @if(!empty($workOrder->extra_works))
+                    <div class="col-span-2 my-1">
+                        <span class="info-label text-xs uppercase text-gray-500">Trabajos Extras:</span>
+                        @foreach($workOrder->extra_works as $extra)
+                            <div class="flex justify-between text-sm ml-2">
+                                <span>- {{ $extra['description'] }}</span>
+                                <span>S/ {{ number_format($extra['price'], 2) }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+
+                <div class="col-span-2 my-1 border-t-2 border-black"></div>
+
                 <div class="info-row col-span-2 sm:col-span-1">
-                    <span class="info-label">Total a Facturar:</span>
-                    <span class="info-value text-indigo-700 font-bold">S/ {{ number_format($workOrder->total_price, 2) }}</span>
+                    <span class="info-label text-indigo-700">Total a Facturar:</span>
+                    <span class="info-value text-indigo-700 font-bold text-lg">S/ {{ number_format($workOrder->total_price, 2) }}</span>
                 </div>
                 <div class="info-row col-span-2 sm:col-span-1">
                     <span class="info-label">Estado Actual:</span>

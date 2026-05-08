@@ -54,7 +54,20 @@
                             </div>
                             <div class="flex justify-between mt-1"><span class="text-gray-500">Cantidad:</span><span>{{ $workOrder->quantity }}</span></div>
                             <div class="flex justify-between mt-1"><span class="text-gray-500">P. Unitario:</span><span>S/ {{ number_format($workOrder->unit_price, 2) }}</span></div>
-                            <div class="flex justify-between mt-1 border-t pt-1 border-gray-100">
+                            
+                            @if(!empty($workOrder->extra_works))
+                                <div class="mt-2 pt-2 border-t border-dashed border-gray-200">
+                                    <span class="text-gray-700 font-bold text-xs uppercase mb-1 block">Trabajos Extras:</span>
+                                    @foreach($workOrder->extra_works as $extra)
+                                        <div class="flex justify-between text-xs text-gray-600 mb-1">
+                                            <span>• {{ $extra['description'] }}</span>
+                                            <span>S/ {{ number_format($extra['price'], 2) }}</span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            <div class="flex justify-between mt-2 border-t pt-2 border-gray-200">
                                 <span class="text-gray-700 font-bold">Total a Facturar:</span>
                                 <span class="font-bold text-indigo-700">S/ {{ number_format($workOrder->total_price, 2) }}</span>
                             </div>

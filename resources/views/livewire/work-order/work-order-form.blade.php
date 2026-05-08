@@ -123,17 +123,45 @@
                                 </div>
                             </div>
                         </div>
-                        <div>
+                        <div class="md:col-span-2">
                             <label for="color" class="block text-sm font-bold text-gray-700 mb-1">Color</label>
                             <input type="text" wire:model="color" id="color" placeholder="Ej: A2, B1, etc." class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full">
                         </div>
-                        <div>
-                            <label for="final_work_type" class="block text-sm font-bold text-gray-700 mb-1">Tipo de Trabajo Final</label>
-                            <input type="text" wire:model="final_work_type" id="final_work_type" placeholder="Descripción del trabajo final" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full">
+
+                        {{-- Trabajos Extras Dinámicos --}}
+                        <div class="md:col-span-2 mt-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <div class="flex justify-between items-center mb-3">
+                                <h4 class="font-bold text-gray-700">Trabajos Extras</h4>
+                                <button type="button" wire:click="addExtraWork" class="px-3 py-1 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 transition text-sm font-semibold">
+                                    + Añadir Extra
+                                </button>
+                            </div>
+
+                            @foreach($extra_works as $index => $extra)
+                                <div class="flex items-start gap-3 mb-3">
+                                    <div class="flex-grow">
+                                        <input type="text" wire:model="extra_works.{{ $index }}.description" placeholder="Descripción del trabajo extra (ej: Soldadura, Malla)" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full text-sm">
+                                        @error("extra_works.{$index}.description") <span class="text-red-600 text-xs mt-1 block">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div class="w-32 relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <span class="text-gray-500 sm:text-sm">S/</span>
+                                        </div>
+                                        <input type="number" step="0.01" min="0" wire:model.live.debounce.300ms="extra_works.{{ $index }}.price" class="pl-8 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full text-sm" placeholder="0.00">
+                                    </div>
+                                    <button type="button" wire:click="removeExtraWork({{ $index }})" class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                    </button>
+                                </div>
+                            @endforeach
+                            @if(count($extra_works) === 0)
+                                <p class="text-sm text-gray-500 italic">No hay trabajos extras agregados a esta orden.</p>
+                            @endif
                         </div>
+
                         <div class="md:col-span-2">
-                            <label for="specifications" class="block text-sm font-bold text-gray-700 mb-1">Especificaciones</label>
-                            <textarea wire:model="specifications" id="specifications" rows="3" placeholder="Detalles adicionales del trabajo..." class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full"></textarea>
+                            <label for="specifications" class="block text-sm font-bold text-gray-700 mb-1">Especificaciones Adicionales</label>
+                            <textarea wire:model="specifications" id="specifications" rows="3" placeholder="Detalles adicionales del trabajo principal..." class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full"></textarea>
                         </div>
                     </div>
                 </div>
