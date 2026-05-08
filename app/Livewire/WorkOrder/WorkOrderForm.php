@@ -198,7 +198,7 @@ class WorkOrderForm extends Component
             'catalog_item_id'      => $this->catalog_item_id,
             'unit_price'           => $this->unit_price,
             'total_price'          => $this->total_price,
-            'prosthetic_type'      => null, // Obsolete but kept nullable
+            'prosthetic_type'      => 'otro', // Fallback para evitar errores con ENUM en BD
             'specifications'       => $this->specifications ?: null,
             'color'                => $this->color ?: null,
             'quantity'             => $this->quantity,
