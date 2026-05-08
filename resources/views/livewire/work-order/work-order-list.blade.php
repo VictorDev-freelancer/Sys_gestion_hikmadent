@@ -146,7 +146,9 @@
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 whitespace-nowrap">
-                                    <span class="text-sm text-gray-700">{{ $order->prosthetic_type->label() }}</span>
+                                    <span class="text-sm text-gray-700">
+                                        {{ $order->catalogItem ? $order->catalogItem->name : ($order->prosthetic_type ? $order->prosthetic_type->label() : '—') }}
+                                    </span>
                                 </td>
                                 <td class="px-4 py-3 whitespace-nowrap">
                                     @if($order->currentArea)
