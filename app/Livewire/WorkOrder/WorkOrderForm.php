@@ -42,8 +42,14 @@ class WorkOrderForm extends Component
 
     public ?int $patient_age = null;
 
-    #[Rule('required|string')]
-    public string $prosthetic_type = '';
+    #[Rule('required|in:regular,student')]
+    public string $client_type = 'regular';
+
+    #[Rule('required|exists:catalog_items,id')]
+    public ?int $catalog_item_id = null;
+
+    public float $unit_price = 0;
+    public float $total_price = 0;
 
     public string $specifications = '';
     public string $color = '';
@@ -67,6 +73,35 @@ class WorkOrderForm extends Component
     
     // Ruta Planificada
     public array $planned_route = [];
+
+    public function updatedClientType()
+    {
+        $this->calculatePrice();
+    }
+
+    public function updatedCatalogItemId()
+    {
+        $this->calculatePrice();
+    }
+
+    public function updatedQuantity()
+    {
+        $this->calculatePrice();
+    }
+
+    private function calculatePrice()
+    {
+        if ($this->catalog_item_id) {
+            $item = \App\Models\CatalogItem::find($this->catalog_item_id);
+            if ($item) {
+                $this->unit_price = $this->client_type === 'student' ? $item->price_student : $item->price_regular;
+                $this->total_price = $this->unit_price * $this->quantity;
+            }
+        } else {
+            $this->unit_price = 0;
+            $this->total_price = 0;
+        }
+    }
 
     public function mount(?int $workOrderId = null): void
     {
@@ -102,7 +137,10 @@ class WorkOrderForm extends Component
         $this->clinic_name           = $wo->clinic_name ?? '';
         $this->patient_name          = $wo->patient_name;
         $this->patient_age           = $wo->patient_age;
-        $this->prosthetic_type       = $wo->prosthetic_type->value;
+        $this->client_type           = $wo->client_type ?? 'regular';
+        $this->catalog_item_id       = $wo->catalog_item_id;
+        $this->unit_price            = (float) $wo->unit_price;
+        $this->total_price           = (float) $wo->total_price;
         $this->specifications        = $wo->specifications ?? '';
         $this->color                 = $wo->color ?? '';
         $this->quantity              = $wo->quantity;
@@ -127,7 +165,8 @@ class WorkOrderForm extends Component
         $this->validate([
             'doctor_name'    => 'required|string|max:255',
             'patient_name'   => 'required|string|max:255',
-            'prosthetic_type' => 'required|string',
+            'client_type'    => 'required|in:regular,student',
+            'catalog_item_id'=> 'required|exists:catalog_items,id',
             'quantity'       => 'required|integer|min:1',
             'priority'       => 'required|string',
             'planned_route.*.area_id' => 'required_with:planned_route.*.technician_id',
@@ -151,11 +190,15 @@ class WorkOrderForm extends Component
 
         $data = [
             'client_id'            => $client->id,
+            'client_type'          => $this->client_type,
             'doctor_name'          => $this->doctor_name,
             'clinic_name'          => $this->clinic_name ?: null,
             'patient_name'         => $this->patient_name,
             'patient_age'          => $this->patient_age,
-            'prosthetic_type'      => $this->prosthetic_type,
+            'catalog_item_id'      => $this->catalog_item_id,
+            'unit_price'           => $this->unit_price,
+            'total_price'          => $this->total_price,
+            'prosthetic_type'      => null, // Obsolete but kept nullable
             'specifications'       => $this->specifications ?: null,
             'color'                => $this->color ?: null,
             'quantity'             => $this->quantity,
@@ -198,11 +241,18 @@ class WorkOrderForm extends Component
 
     public function render()
     {
+        $catalogItems = \App\Models\CatalogItem::where('is_active', true)
+            ->orderBy('category')
+            ->orderBy('name')
+            ->get()
+            ->groupBy('category');
+
         return view('livewire.work-order.work-order-form', [
             'prostheticTypes' => ProstheticType::options(),
             'priorities'      => Priority::options(),
             'areas'           => Area::active()->ordered()->get(),
             'technicians'     => User::all(),
+            'catalogItems'    => $catalogItems,
         ]);
     }
 }

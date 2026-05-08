@@ -94,8 +94,12 @@
                 <div class="col-span-2 my-2 border-t-2 border-black"></div>
 
                 <div class="info-row col-span-2 sm:col-span-1">
-                    <span class="info-label">Tipo Protésico:</span>
-                    <span class="info-value uppercase bg-gray-200 px-2 py-0.5 rounded">{{ $workOrder->prosthetic_type->label() ?? '—' }}</span>
+                    <span class="info-label">Tipo de Cliente:</span>
+                    <span class="info-value uppercase bg-gray-200 px-2 py-0.5 rounded">{{ $workOrder->client_type === 'student' ? 'Estudiante' : 'Persona Natural' }}</span>
+                </div>
+                <div class="info-row col-span-2 sm:col-span-1">
+                    <span class="info-label">Servicio:</span>
+                    <span class="info-value">{{ $workOrder->catalogItem ? $workOrder->catalogItem->name : 'N/A' }}</span>
                 </div>
                 <div class="info-row col-span-2 sm:col-span-1">
                     <span class="info-label">Color / Tono:</span>
@@ -104,6 +108,10 @@
                 <div class="info-row col-span-2 sm:col-span-1">
                     <span class="info-label">Cantidad:</span>
                     <span class="info-value">{{ $workOrder->quantity ?? 1 }}</span>
+                </div>
+                <div class="info-row col-span-2 sm:col-span-1">
+                    <span class="info-label">Total a Facturar:</span>
+                    <span class="info-value text-indigo-700 font-bold">S/ {{ number_format($workOrder->total_price, 2) }}</span>
                 </div>
                 <div class="info-row col-span-2 sm:col-span-1">
                     <span class="info-label">Estado Actual:</span>

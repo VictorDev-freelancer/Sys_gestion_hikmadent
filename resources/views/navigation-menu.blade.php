@@ -44,9 +44,13 @@
 
                     @role('Super usuario')
                     <x-nav-link href="{{ route('admin.users') }}" :active="request()->routeIs('admin.users')">
-                        {{ __('Control de Personal') }}
+                        {{ __('Usuarios') }}
                     </x-nav-link>
-                    @endrole
+                    
+                    <x-nav-link href="{{ route('admin.catalog.index') }}" :active="request()->routeIs('admin.catalog.*')">
+                        {{ __('Catálogo') }}
+                    </x-nav-link>
+                @endrole
                 </div>
             </div>
 
@@ -201,9 +205,13 @@
             @endforeach
 
             @role('Super usuario')
-            <x-responsive-nav-link href="{{ route('admin.users') }}" :active="request()->routeIs('admin.users')">
-                {{ __('Control de Personal') }}
-            </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('admin.users') }}" :active="request()->routeIs('admin.users')">
+                    {{ __('Control de Personal') }}
+                </x-responsive-nav-link>
+
+                <x-responsive-nav-link href="{{ route('admin.catalog.index') }}" :active="request()->routeIs('admin.catalog.*')">
+                    {{ __('Catálogo') }}
+                </x-responsive-nav-link>
             @endrole
         </div>
 

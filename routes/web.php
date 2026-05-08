@@ -61,6 +61,18 @@ Route::middleware([
             Route::get('/kardex', KardexReport::class)
                 ->name('inventory.kardex');
         });
+
+        // --------------------------------------------------------
+        // MÓDULO DE CATÁLOGO (Precios de Trabajos)
+        // --------------------------------------------------------
+        Route::prefix('catalogo')->group(function () {
+            Route::get('/', \App\Livewire\Admin\Catalog\CatalogList::class)
+                ->name('admin.catalog.index');
+            Route::get('/crear', \App\Livewire\Admin\Catalog\CatalogForm::class)
+                ->name('admin.catalog.create');
+            Route::get('/{id}/editar', \App\Livewire\Admin\Catalog\CatalogForm::class)
+                ->name('admin.catalog.edit');
+        });
     });
 
     // --------------------------------------------------------

@@ -1,0 +1,118 @@
+LISTA DE TRABAJO PRECIOS – PERSONA NATURAL / CLINICAS
+1.	IPS E.MAX(Disilicato de litio)
+a.	Corona S/ 360.00
+b.	Carilla S/ 360.00
+c.	Fragmentos S/ 360.00
+
+2.	METAL CAD-CAM – PORCELANA
+a.	Corona Metal- porcelana S/ 180.00
+b.	Hombro Cerámico S/ 40.00
+c.	Encia rosada S/ 20.00
+d.	Apoyo ó fresado de corona para PPR S/ 40.00
+e.	Apoyo simple Metálico S/ 40.00
+f.	Incrustacion metalica S/ 50.00
+g.	Corona completa metalica S/ 70.00
+h.	Attaches (sin matrix) S/ 80.00
+i.	Rompe fuerzas S/ 80.00
+
+3.	SOLDADURA
+a.	Soldadura Convencional x Pza. S/ 50.00
+
+4.	ZIRCONIO - CAD-CAM
+a.	Corona con Cerámica CAD-CAM S/ 410.00
+b.	Corona monolítica individual CAD-CAM S/ 410.00
+c.	Encía rosada por pieza S/ 40.00
+
+5.	ENCERADO
+a.	Encerado manual de Diagnóstico por pza S/ 20.00
+b.	Encerado de diagnóstico por pza digital + impresion S/ 20.00
+c.	Encerado de diagnóstico por pza digital S/ 15.00
+d.	Impresion hemiarcada S/ 35.00
+e.	Impresión de modelo digital S/ 70.00
+f.	Impresion modelo digital con zocalo S/ 90.00
+
+6.	IMPLANTES
+a.	Corona de zirconio individual (CAD-CAM) S/ 420.00
+b.	Corona Metal Porcelana Atornillada CAD CAM CoCr (envía solo tornillo) S/ 250.00
+c.	Corona Metal Porcelana Cemento atornillada CAD CAM CoCr (Fresado + Corona) S/ 200.00
+d.	Corona Metal porcelana atornillada con calcinable S/ 200.00
+e.	Pilar Personalizado CAD CAM CoCr (envía solo tornillo) S/ 180.00
+f.	Pilar Personalizado CAD CAM CoCr más opacado (envia sólo tornillo) S/ 190.00
+g.	Pilar Personalizado Colado CrNi (envía UCLA y tornillo) mas opacado S/ 50.00 
+h.	Pilar Personalizado CAD-CAM Zirconio S/ 110.00
+i.	Pilar Personalizado CAD-CAM Zirconio resvestido por ceramica S/ 130.00
+
+7.	IMPLANTES MULTIPLES
+a.	Hibrida metalica sobre 6 implantes S/ 3500.00
+b.	Hibrida de Zr. sobre 6 implantes S/ 5500.00
+
+8.	CEROMERO
+a.	Inlay - onlay- overlay S/ 150.00
+b.	Carillas S/ 190.00
+c.	Corona completa S/ 200.00
+
+9.	MODELOS
+a.	Modelos con implantes con gingifast S/ 85.00
+b.	Modelo troquelado S/ 70.00
+c.	Modelo de estudio S/ 30.00
+
+10.	PMMA
+a.	Coronas PMMA S/ 70.00
+b.	Ferula mioreljante S/ 300.00
+c.	Resina nanohibrida S/ 250.00
+
+LISTA DE TRABAJO PRECIOS – ESTUDIANTES
+1.	IPS E.MAX PRES (Disilicato de litio)
+a.	Corona S/ 250.00
+b.	Carilla S/ 250.00
+c.	Fragmentos S/ 250.00
+d.	Inlay - onlay - overlay S/ 250.00
+
+2.	METAL – PORCELANA
+a.	Corona Metal- porcelana S/ 125.00
+b.	Hombro Cerámico S/ 20.00
+c.	Encia rosada S/ 20.00
+d.	Apoyo ó fresado de corona para PPR S/ 20.00
+e.	Apoyo simple Metálico S/ 18.00
+f.	Incrustación metalica S/ 45.00
+g.	Corona completa metálica S/ 65.00
+h.	Attaches (sin matrix) S/ 70.00 
+i.	Rompe fuerzas S/ 70.00
+
+3.	SOLDADURA
+a.	Soldadura Convencional x Pza. (por sección) S/ 40.00
+
+4.	ZIRCONIO
+a.	Corona con Cerámica CAD-CAM S/ 300.00
+b.	Corona monolÍtica individual CAD-CAM S/ 300.00
+c.	Encía rosada por pieza S/ 20.00
+
+5.	ENCERADO
+a.	Encerado de Diagnostico por pza S/ 15.00
+b.	Encerado de Diagnostico pza digital S/ 10.00 
+c.	Impresión de modelo digital 3D sup. e inf. S/ 90.00
+
+6.	IMPLANTES
+a.	Corona de zirconio individual (CAD-CAM) S/ 300.00
+b.	Corona Metal Porcelana Atornillada CAD CAM CoCr (envía solo tornillo) S/ 250.00
+c.	Corona Metal Porcelana Cemento atornillada CAD CAM CoCr (Fresado + Corona) S/ 180.00
+d.	Corona Metal porcelana atornillada con calcinable S/ 180.00
+e.	Pilar Personalizado CAD CAM CoCr (envía solo tornillo) S/ 150.00
+f.	Pilar Personalizado CAD CAM CoCr más opacado envia sólo tornillo) S/ 150.00
+g.	Pilar Personalizado Colado CrNi (envía UCLA y tornillo) más opacado S/ 50.00
+h.	Pilar Personalizado CAD-CAM Zirconio S/ 150.00
+
+7.	IMPLANTES MULTIPLES
+a.	Hibrida metalica sobre 6 implantes S/ 3500.00 
+b.	Hibrida de Zirconia sobre 6 implantes S/ 5500.00
+
+8.	CEROMERO
+a.	Inlay - onlay- overlay S/ 110.00
+b.	Carillas S/ 120.00
+c.	Corona completa S/ 150.00
+d.	Coronas PMMA S/ 50.00
+
+9.	MODELOS
+a.	Modelos con implantes con gingifast S/ 50.00
+b.	Modelo troquelado S/ 50.00
+c.	Modelo de estudio S/ 30.00

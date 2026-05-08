@@ -33,12 +33,16 @@ class WorkOrder extends Model
     protected $fillable = [
         'code',
         'client_id',
+        'client_type',
         'created_by',
         'assigned_tpd_id',
         'doctor_name',
         'clinic_name',
         'patient_name',
         'patient_age',
+        'catalog_item_id',
+        'unit_price',
+        'total_price',
         'prosthetic_type',
         'specifications',
         'color',
@@ -64,6 +68,8 @@ class WorkOrder extends Model
             'priority'             => Priority::class,
             'patient_age'          => 'integer',
             'quantity'             => 'integer',
+            'unit_price'           => 'decimal:2',
+            'total_price'          => 'decimal:2',
             'order_date'           => 'date',
             'technical_send_date'  => 'date',
             'clinic_delivery_date' => 'date',
@@ -117,7 +123,9 @@ class WorkOrder extends Model
 
     /* ------------------------------------------------------------------ */
     /*  RELACIONES                                                         */
-    /* ------------------------------------------------------------------ */
+    /* ================================================================== */
+    /*  2. RELACIONES ELOQUENT                                             */
+    /* ================================================================== */
 
     /**
      * Cliente que solicitó la orden.
@@ -125,6 +133,11 @@ class WorkOrder extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function catalogItem(): BelongsTo
+    {
+        return $this->belongsTo(CatalogItem::class);
     }
 
     /**

@@ -63,6 +63,14 @@
                             @error('patient_name') <span class="text-red-600 text-xs mt-1 block">{{ $message }}</span> @enderror
                         </div>
                         <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Tipo de Cliente *</label>
+                            <select wire:model.live="client_type" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full bg-white">
+                                <option value="regular">Persona Natural / Clínica</option>
+                                <option value="student">Estudiante</option>
+                            </select>
+                            @error('client_type') <span class="text-red-600 text-xs mt-1 block">{{ $message }}</span> @enderror
+                        </div>
+                        <div>
                             <label for="patient_age" class="block text-sm font-bold text-gray-700 mb-1">Edad</label>
                             <input type="number" wire:model="patient_age" id="patient_age" min="1" max="120" placeholder="Años" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full">
                         </div>
@@ -80,20 +88,40 @@
                         </h3>
                     </div>
                     <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div>
-                            <label for="prosthetic_type" class="block text-sm font-bold text-gray-700 mb-1">Tipo Protésico *</label>
-                            <select wire:model="prosthetic_type" id="prosthetic_type" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full bg-white">
-                                <option value="">Seleccionar tipo...</option>
-                                @foreach($prostheticTypes as $value => $label)
-                                    <option value="{{ $value }}">{{ $label }}</option>
+                        <div class="md:col-span-2">
+                            <label for="catalog_item_id" class="block text-sm font-bold text-gray-700 mb-1">Servicio del Catálogo *</label>
+                            <select wire:model.live="catalog_item_id" id="catalog_item_id" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full bg-white">
+                                <option value="">Seleccionar trabajo...</option>
+                                @foreach($catalogItems as $category => $items)
+                                    <optgroup label="{{ $category }}">
+                                        @foreach($items as $item)
+                                            <option value="{{ $item->id }}">
+                                                {{ $item->name }} (S/ {{ number_format($client_type === 'student' ? $item->price_student : $item->price_regular, 2) }})
+                                            </option>
+                                        @endforeach
+                                    </optgroup>
                                 @endforeach
                             </select>
-                            @error('prosthetic_type') <span class="text-red-600 text-xs mt-1 block">{{ $message }}</span> @enderror
+                            @error('catalog_item_id') <span class="text-red-600 text-xs mt-1 block">{{ $message }}</span> @enderror
                         </div>
+
                         <div>
                             <label for="quantity" class="block text-sm font-bold text-gray-700 mb-1">Cantidad *</label>
-                            <input type="number" wire:model="quantity" id="quantity" min="1" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full">
+                            <input type="number" wire:model.live="quantity" id="quantity" min="1" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full">
                             @error('quantity') <span class="text-red-600 text-xs mt-1 block">{{ $message }}</span> @enderror
+                        </div>
+                        
+                        <div class="flex items-end">
+                            <div class="w-full bg-gray-50 rounded p-3 border border-gray-200">
+                                <div class="flex justify-between items-center text-sm mb-1">
+                                    <span class="text-gray-500">Precio Unitario:</span>
+                                    <span class="font-semibold text-gray-700">S/ {{ number_format($unit_price, 2) }}</span>
+                                </div>
+                                <div class="flex justify-between items-center text-base border-t border-gray-200 pt-1 mt-1">
+                                    <span class="text-gray-700 font-bold">Total a Facturar:</span>
+                                    <span class="font-bold text-indigo-700">S/ {{ number_format($total_price, 2) }}</span>
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <label for="color" class="block text-sm font-bold text-gray-700 mb-1">Color</label>

@@ -44,8 +44,20 @@
                             <div class="flex justify-between"><span class="text-gray-500">Doctor:</span><span>{{ $workOrder->doctor_name }}</span></div>
                             @if($workOrder->clinic_name)<div class="flex justify-between"><span class="text-gray-500">Consultorio:</span><span>{{ $workOrder->clinic_name }}</span></div>@endif
                             <hr>
-                            <div class="flex justify-between"><span class="text-gray-500">Tipo Protésico:</span><span class="font-medium">{{ $workOrder->prosthetic_type->label() }}</span></div>
-                            <div class="flex justify-between"><span class="text-gray-500">Cantidad:</span><span>{{ $workOrder->quantity }}</span></div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Tipo de Cliente:</span>
+                                <span class="font-medium">{{ $workOrder->client_type === 'student' ? 'Estudiante' : 'Persona Natural / Clínica' }}</span>
+                            </div>
+                            <div class="flex justify-between mt-1">
+                                <span class="text-gray-500">Servicio:</span>
+                                <span class="font-medium">{{ $workOrder->catalogItem ? $workOrder->catalogItem->name : 'N/A' }}</span>
+                            </div>
+                            <div class="flex justify-between mt-1"><span class="text-gray-500">Cantidad:</span><span>{{ $workOrder->quantity }}</span></div>
+                            <div class="flex justify-between mt-1"><span class="text-gray-500">P. Unitario:</span><span>S/ {{ number_format($workOrder->unit_price, 2) }}</span></div>
+                            <div class="flex justify-between mt-1 border-t pt-1 border-gray-100">
+                                <span class="text-gray-700 font-bold">Total a Facturar:</span>
+                                <span class="font-bold text-indigo-700">S/ {{ number_format($workOrder->total_price, 2) }}</span>
+                            </div>
                             @if($workOrder->color)<div class="flex justify-between"><span class="text-gray-500">Color:</span><span>{{ $workOrder->color }}</span></div>@endif
                             @if($workOrder->specifications)
                             <div>
