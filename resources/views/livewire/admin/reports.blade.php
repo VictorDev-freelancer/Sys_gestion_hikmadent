@@ -12,83 +12,83 @@
             </div>
             
             {{-- Filtro de Periodo Global --}}
-            <div class="bg-white p-1 rounded-lg border border-gray-200 shadow-sm flex space-x-1">
-                <button wire:click="setPeriod('weekly')" class="px-4 py-2 text-xs font-bold rounded-md transition-all {{ $period === 'weekly' ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-600 hover:text-indigo-600' }}">
+            <div class="bg-white p-1.5 rounded-xl border border-gray-200 shadow-sm flex space-x-1">
+                <button wire:click="setPeriod('weekly')" class="px-4 py-2 text-xs font-bold rounded-lg transition-all {{ $period === 'weekly' ? 'bg-indigo-600 text-white shadow-md' : 'text-gray-600 hover:text-indigo-600 hover:bg-indigo-50/50' }}">
                     📅 Vista Semanal
                 </button>
-                <button wire:click="setPeriod('monthly')" class="px-4 py-2 text-xs font-bold rounded-md transition-all {{ $period === 'monthly' ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-600 hover:text-indigo-600' }}">
+                <button wire:click="setPeriod('monthly')" class="px-4 py-2 text-xs font-bold rounded-lg transition-all {{ $period === 'monthly' ? 'bg-indigo-600 text-white shadow-md' : 'text-gray-600 hover:text-indigo-600 hover:bg-indigo-50/50' }}">
                     📊 Vista Mensual
                 </button>
             </div>
         </div>
     </x-slot>
 
-    <div class="py-8 bg-gray-50/50 min-h-screen">
+    <div class="py-8 bg-gray-50/50 min-h-screen font-sans">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
 
-            {{-- 1. Tarjetas de Indicadores Clave (KPIs) --}}
+            {{-- 1. Tarjetas de Indicadores Clave (KPIs) con Máximo Contraste y Claridad --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <!-- Facturación Total -->
-                <div class="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl shadow-xl p-6 text-white transform hover:-translate-y-1 transition duration-200">
+                <div class="bg-white rounded-2xl shadow-xl p-6 border-l-4 border-indigo-600 transform hover:-translate-y-0.5 transition duration-200">
                     <div class="flex justify-between items-start">
                         <div>
-                            <p class="text-indigo-100 text-xs font-bold uppercase tracking-wider">Facturación Total</p>
-                            <h3 class="text-3xl font-black mt-2 font-mono">S/ {{ number_format($kpis['total_earnings'], 2) }}</h3>
+                            <p class="text-gray-400 text-[10px] font-black uppercase tracking-wider">Facturación Total</p>
+                            <h3 class="text-2xl font-black mt-2 text-gray-900 font-mono">S/ {{ number_format($kpis['total_earnings'], 2) }}</h3>
                         </div>
-                        <span class="p-3 bg-indigo-400/30 rounded-xl">
+                        <span class="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl text-lg font-bold">
                             💵
                         </span>
                     </div>
-                    <div class="mt-4 flex items-center text-xs text-indigo-100">
-                        <span class="font-bold mr-1">Histórico</span> órdenes completadas y entregadas.
+                    <div class="mt-4 flex items-center text-xs text-gray-400">
+                        <span class="font-bold text-indigo-600 mr-1">Histórico</span> de órdenes finalizadas.
                     </div>
                 </div>
 
                 <!-- Total de Órdenes -->
-                <div class="bg-gradient-to-br from-violet-500 to-violet-600 rounded-2xl shadow-xl p-6 text-white transform hover:-translate-y-1 transition duration-200">
+                <div class="bg-white rounded-2xl shadow-xl p-6 border-l-4 border-violet-500 transform hover:-translate-y-0.5 transition duration-200">
                     <div class="flex justify-between items-start">
                         <div>
-                            <p class="text-violet-100 text-xs font-bold uppercase tracking-wider">Órdenes Totales</p>
-                            <h3 class="text-3xl font-black mt-2 font-mono">{{ number_format($kpis['total_orders']) }}</h3>
+                            <p class="text-gray-400 text-[10px] font-black uppercase tracking-wider">Órdenes Totales</p>
+                            <h3 class="text-2xl font-black mt-2 text-gray-900 font-mono">{{ number_format($kpis['total_orders']) }}</h3>
                         </div>
-                        <span class="p-3 bg-violet-400/30 rounded-xl">
+                        <span class="p-2.5 bg-violet-50 text-violet-600 rounded-xl text-lg font-bold">
                             📦
                         </span>
                     </div>
-                    <div class="mt-4 flex items-center text-xs text-violet-100">
-                        <span class="font-bold mr-1">{{ number_format($kpis['completed_orders']) }}</span> completadas con éxito.
+                    <div class="mt-4 flex items-center text-xs text-gray-400">
+                        <span class="font-bold text-violet-500 mr-1">{{ number_format($kpis['completed_orders']) }}</span> completadas con éxito.
                     </div>
                 </div>
 
                 <!-- Ticket Promedio -->
-                <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl shadow-xl p-6 text-white transform hover:-translate-y-1 transition duration-200">
+                <div class="bg-white rounded-2xl shadow-xl p-6 border-l-4 border-emerald-500 transform hover:-translate-y-0.5 transition duration-200">
                     <div class="flex justify-between items-start">
                         <div>
-                            <p class="text-emerald-100 text-xs font-bold uppercase tracking-wider">Valor Promedio / OT</p>
-                            <h3 class="text-3xl font-black mt-2 font-mono">S/ {{ number_format($kpis['average_ticket'], 2) }}</h3>
+                            <p class="text-gray-400 text-[10px] font-black uppercase tracking-wider">Valor Promedio / OT</p>
+                            <h3 class="text-2xl font-black mt-2 text-gray-900 font-mono">S/ {{ number_format($kpis['average_ticket'], 2) }}</h3>
                         </div>
-                        <span class="p-3 bg-emerald-400/30 rounded-xl">
+                        <span class="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl text-lg font-bold">
                             📈
                         </span>
                     </div>
-                    <div class="mt-4 flex items-center text-xs text-emerald-100">
-                        <span class="font-bold mr-1">Rendimiento medio</span> por orden de trabajo.
+                    <div class="mt-4 flex items-center text-xs text-gray-400">
+                        <span class="font-bold text-emerald-500 mr-1">Rendimiento medio</span> por orden.
                     </div>
                 </div>
 
                 <!-- Eficiencia de Entrega -->
-                <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl shadow-xl p-6 text-white transform hover:-translate-y-1 transition duration-200">
+                <div class="bg-white rounded-2xl shadow-xl p-6 border-l-4 border-orange-500 transform hover:-translate-y-0.5 transition duration-200">
                     <div class="flex justify-between items-start">
                         <div>
-                            <p class="text-orange-100 text-xs font-bold uppercase tracking-wider">Eficiencia de Entrega</p>
-                            <h3 class="text-3xl font-black mt-2 font-mono">{{ number_format($kpis['on_time_percentage'], 1) }}%</h3>
+                            <p class="text-gray-400 text-[10px] font-black uppercase tracking-wider">Eficiencia de Entrega</p>
+                            <h3 class="text-2xl font-black mt-2 text-gray-900 font-mono">{{ number_format($kpis['on_time_percentage'], 1) }}%</h3>
                         </div>
-                        <span class="p-3 bg-orange-400/30 rounded-xl">
+                        <span class="p-2.5 bg-orange-50 text-orange-600 rounded-xl text-lg font-bold">
                             ⚡
                         </span>
                     </div>
-                    <div class="mt-4 flex items-center text-xs text-orange-100">
-                        <span class="font-bold mr-1">Entregas a tiempo</span> vs. fechas límite de clínica.
+                    <div class="mt-4 flex items-center text-xs text-gray-400">
+                        <span class="font-bold text-orange-500 mr-1">Entregas a tiempo</span> en clínica.
                     </div>
                 </div>
             </div>
@@ -211,7 +211,7 @@
         </div>
     </div>
 
-    {{-- SCRIPTS DE CHART.JS --}}
+    {{-- SCRIPTS DE CHART.JS CON MÁXIMA REACTIVIDAD DE EVENTOS NATIVOS --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -270,7 +270,7 @@
                 data: {
                     labels: initialData.labels,
                     datasets: [{
-                        label: 'Facturación Semanal (S/.)',
+                        label: 'Facturación (S/.)',
                         data: initialData.earnings,
                         backgroundColor: 'rgba(139, 92, 246, 0.85)',
                         hoverBackgroundColor: '#8b5cf6',
@@ -360,24 +360,20 @@
                 }
             });
 
-            // Escuchar actualizaciones de Livewire para refrescar los gráficos
-            document.addEventListener('livewire:init', () => {
-                Livewire.on('chartsUpdated', (event) => {
-                    const data = event[0].chartData;
+            // ─── ESCUCHAR ACTUALIZACIONES REACTIVAS NATIVAS DE WINDOW ───
+            window.addEventListener('charts-updated', (event) => {
+                const data = event.detail.chartData;
 
-                    // Actualizar Producción
-                    productionChart.data.labels = data.labels;
-                    productionChart.data.datasets[0].data = data.created;
-                    productionChart.data.datasets[1].data = data.completed;
-                    productionChart.buildOrUpdateControllers();
-                    productionChart.update();
+                // Actualizar Producción
+                productionChart.data.labels = data.labels;
+                productionChart.data.datasets[0].data = data.created;
+                productionChart.data.datasets[1].data = data.completed;
+                productionChart.update();
 
-                    // Actualizar Financiero
-                    financialChart.data.labels = data.labels;
-                    financialChart.data.datasets[0].data = data.earnings;
-                    financialChart.buildOrUpdateControllers();
-                    financialChart.update();
-                });
+                // Actualizar Financiero
+                financialChart.data.labels = data.labels;
+                financialChart.data.datasets[0].data = data.earnings;
+                financialChart.update();
             });
         });
     </script>

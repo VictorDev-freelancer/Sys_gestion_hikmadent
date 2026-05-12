@@ -387,22 +387,18 @@
                 }
             });
 
-            // Escuchar actualizaciones de Livewire para refrescar los gráficos
-            document.addEventListener('livewire:init', () => {
-                Livewire.on('chartsUpdated', (event) => {
-                    const data = event[0].chartData;
+            // Escuchar actualizaciones reactivas nativas de window
+            window.addEventListener('charts-updated', (event) => {
+                const data = event.detail.chartData;
 
-                    dbProdChart.data.labels = data.labels;
-                    dbProdChart.data.datasets[0].data = data.created;
-                    dbProdChart.data.datasets[1].data = data.completed;
-                    dbProdChart.buildOrUpdateControllers();
-                    dbProdChart.update();
+                dbProdChart.data.labels = data.labels;
+                dbProdChart.data.datasets[0].data = data.created;
+                dbProdChart.data.datasets[1].data = data.completed;
+                dbProdChart.update();
 
-                    dbFinChart.data.labels = data.labels;
-                    dbFinChart.data.datasets[0].data = data.earnings;
-                    dbFinChart.buildOrUpdateControllers();
-                    dbFinChart.update();
-                });
+                dbFinChart.data.labels = data.labels;
+                dbFinChart.data.datasets[0].data = data.earnings;
+                dbFinChart.update();
             });
         });
     </script>

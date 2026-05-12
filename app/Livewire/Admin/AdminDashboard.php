@@ -96,9 +96,7 @@ class AdminDashboard extends Component
     public function setPeriod($period)
     {
         $this->period = $period;
-        $this->dispatch('chartsUpdated', [
-            'chartData' => $this->getChartData()
-        ]);
+        $this->dispatch('charts-updated', chartData: $this->getChartData());
     }
 
     public function getChartData()
