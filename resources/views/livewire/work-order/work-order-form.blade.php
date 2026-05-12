@@ -89,7 +89,7 @@
                     </div>
                     <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div class="md:col-span-2">
-                            <label for="catalog_item_id" class="block text-sm font-bold text-gray-700 mb-1">Servicio del Catálogo *</label>
+                            <label for="catalog_item_id" class="block text-sm font-bold text-gray-700 mb-1">Tipo de Trabajo Protésico *</label>
                             <select wire:model.live="catalog_item_id" id="catalog_item_id" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full bg-white">
                                 <option value="">Seleccionar trabajo...</option>
                                 @foreach($catalogItems as $category => $items)

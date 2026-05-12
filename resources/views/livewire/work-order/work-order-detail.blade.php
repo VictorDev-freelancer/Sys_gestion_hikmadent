@@ -49,7 +49,7 @@
                                 <span class="font-medium">{{ $workOrder->client_type === 'student' ? 'Estudiante' : 'Persona Natural / Clínica' }}</span>
                             </div>
                             <div class="flex justify-between mt-1">
-                                <span class="text-gray-500">Servicio:</span>
+                                <span class="text-gray-500">Trabajo Protésico:</span>
                                 <span class="font-medium">{{ $workOrder->catalogItem ? $workOrder->catalogItem->name : 'N/A' }}</span>
                             </div>
                             <div class="flex justify-between mt-1"><span class="text-gray-500">Cantidad:</span><span>{{ $workOrder->quantity }}</span></div>
