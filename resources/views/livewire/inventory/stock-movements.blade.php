@@ -105,8 +105,8 @@
 
     {{-- MODAL: Nuevo Movimiento --}}
     @if($showMovementModal)
-    <div class="fixed inset-0 bg-gray-500/75 flex items-center justify-center z-50">
-        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+    <div class="fixed inset-0 bg-gray-500/75 flex items-center justify-center z-50 animate-fade-in">
+        <div id="inventory-movement-modal" class="bg-white rounded-xl shadow-2xl p-6 w-full max-h-[95vh] overflow-y-auto modal-compact">
             <h3 class="text-lg font-bold text-gray-900 mb-4">
                 @switch($movementAction)
                     @case('entry') 📥 Registrar Entrada @break
@@ -199,4 +199,31 @@
         </div>
     </div>
     @endif
+
+    {{-- Compact Inventory Modals Style Isolation --}}
+    <style>
+        #inventory-movement-modal {
+            max-width: 480px !important;
+        }
+        .modal-compact input, 
+        .modal-compact select, 
+        .modal-compact textarea {
+            padding-top: 0.375rem !important;
+            padding-bottom: 0.375rem !important;
+            font-size: 0.875rem !important; /* text-sm */
+        }
+        .modal-compact label {
+            font-size: 0.75rem !important; /* text-xs */
+            font-weight: 600 !important;
+            color: #4b5563 !important; /* text-gray-600 */
+            margin-bottom: 0.125rem !important;
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.2s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
 </div>

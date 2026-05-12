@@ -197,8 +197,8 @@
 
     {{-- MODAL: Categoría --}}
     @if($showCategoryModal)
-    <div class="fixed inset-0 bg-gray-500/75 flex items-center justify-center z-50">
-        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md">
+    <div class="fixed inset-0 bg-gray-500/75 flex items-center justify-center z-50 animate-fade-in">
+        <div id="inventory-category-modal" class="bg-white rounded-xl shadow-2xl p-6 w-full modal-compact">
             <h3 class="text-lg font-bold text-gray-900 mb-4">{{ $editingCategoryId ? 'Editar' : 'Nueva' }} Categoría</h3>
             <div class="space-y-4">
                 <div>
@@ -221,8 +221,8 @@
 
     {{-- MODAL: Proveedor --}}
     @if($showSupplierModal)
-    <div class="fixed inset-0 bg-gray-500/75 flex items-center justify-center z-50">
-        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-lg">
+    <div class="fixed inset-0 bg-gray-500/75 flex items-center justify-center z-50 animate-fade-in">
+        <div id="inventory-supplier-modal" class="bg-white rounded-xl shadow-2xl p-6 w-full modal-compact">
             <h3 class="text-lg font-bold text-gray-900 mb-4">{{ $editingSupplierId ? 'Editar' : 'Nuevo' }} Proveedor</h3>
             <div class="grid grid-cols-2 gap-4">
                 <div class="col-span-2">
@@ -258,8 +258,8 @@
 
     {{-- MODAL: Producto --}}
     @if($showProductModal)
-    <div class="fixed inset-0 bg-gray-500/75 flex items-center justify-center z-50">
-        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-lg">
+    <div class="fixed inset-0 bg-gray-500/75 flex items-center justify-center z-50 animate-fade-in">
+        <div id="inventory-product-modal" class="bg-white rounded-xl shadow-2xl p-6 w-full modal-compact">
             <h3 class="text-lg font-bold text-gray-900 mb-4">{{ $editingProductId ? 'Editar' : 'Nuevo' }} Producto</h3>
             <div class="space-y-4">
                 <div>
@@ -309,8 +309,8 @@
 
     {{-- MODAL: Variante --}}
     @if($showVariantModal)
-    <div class="fixed inset-0 bg-gray-500/75 flex items-center justify-center z-50">
-        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-lg">
+    <div class="fixed inset-0 bg-gray-500/75 flex items-center justify-center z-50 animate-fade-in">
+        <div id="inventory-variant-modal" class="bg-white rounded-xl shadow-2xl p-6 w-full modal-compact">
             <h3 class="text-lg font-bold text-gray-900 mb-4">{{ $editingVariantId ? 'Editar' : 'Nueva' }} Variante</h3>
             <div class="space-y-4">
                 <div>
@@ -367,4 +367,40 @@
         </div>
     </div>
     @endif
+
+    {{-- Compact Inventory Modals Style Isolation --}}
+    <style>
+        #inventory-category-modal {
+            max-width: 400px !important;
+        }
+        #inventory-supplier-modal {
+            max-width: 460px !important;
+        }
+        #inventory-product-modal {
+            max-width: 460px !important;
+        }
+        #inventory-variant-modal {
+            max-width: 480px !important;
+        }
+        .modal-compact input, 
+        .modal-compact select, 
+        .modal-compact textarea {
+            padding-top: 0.375rem !important;
+            padding-bottom: 0.375rem !important;
+            font-size: 0.875rem !important; /* text-sm */
+        }
+        .modal-compact label {
+            font-size: 0.75rem !important; /* text-xs */
+            font-weight: 600 !important;
+            color: #4b5563 !important; /* text-gray-600 */
+            margin-bottom: 0.125rem !important;
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.2s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
 </div>

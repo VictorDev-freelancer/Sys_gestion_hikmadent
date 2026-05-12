@@ -99,9 +99,15 @@ class WorkOrderForm extends Component
     public function addExtraWork(): void
     {
         $this->extra_works[] = [
+            'catalog_item_id' => '',
             'description' => '',
             'price' => 0
         ];
+    }
+
+    public function updateExtraWorkDetails($index): void
+    {
+        $this->calculatePrice();
     }
 
     public function removeExtraWork(int $index): void
@@ -125,8 +131,15 @@ class WorkOrderForm extends Component
         }
 
         $extrasTotal = 0;
-        foreach ($this->extra_works as $extra) {
-            $extrasTotal += floatval($extra['price'] ?? 0);
+        foreach ($this->extra_works as $index => $extra) {
+            if (!empty($extra['catalog_item_id'])) {
+                $item = \App\Models\CatalogItem::find($extra['catalog_item_id']);
+                if ($item) {
+                    $this->extra_works[$index]['description'] = $item->name;
+                    $this->extra_works[$index]['price'] = $this->client_type === 'student' ? $item->price_student : $item->price_regular;
+                }
+            }
+            $extrasTotal += floatval($this->extra_works[$index]['price'] ?? 0);
         }
 
         $this->total_price = $baseTotal + $extrasTotal;

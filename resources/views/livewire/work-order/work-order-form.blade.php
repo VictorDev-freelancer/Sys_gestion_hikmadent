@@ -140,14 +140,25 @@
                             @foreach($extra_works as $index => $extra)
                                 <div class="flex items-start gap-3 mb-3">
                                     <div class="flex-grow">
-                                        <input type="text" wire:model="extra_works.{{ $index }}.description" placeholder="Descripción del trabajo extra (ej: Soldadura, Malla)" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full text-sm">
-                                        @error("extra_works.{$index}.description") <span class="text-red-600 text-xs mt-1 block">{{ $message }}</span> @enderror
+                                        <select wire:model.live="extra_works.{{ $index }}.catalog_item_id" wire:change="updateExtraWorkDetails({{ $index }})" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full text-sm bg-white">
+                                            <option value="">Seleccionar extra del catálogo...</option>
+                                            @foreach($catalogItems as $category => $items)
+                                                <optgroup label="{{ $category }}">
+                                                    @foreach($items as $item)
+                                                        <option value="{{ $item->id }}">
+                                                            {{ $item->name }}
+                                                        </option>
+                                                    @endforeach
+                                                </optgroup>
+                                            @endforeach
+                                        </select>
+                                        @error("extra_works.{$index}.catalog_item_id") <span class="text-red-600 text-xs mt-1 block">{{ $message }}</span> @enderror
                                     </div>
                                     <div class="w-32 relative">
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                             <span class="text-gray-500 sm:text-sm">S/</span>
                                         </div>
-                                        <input type="number" step="0.01" min="0" wire:model.live.debounce.300ms="extra_works.{{ $index }}.price" class="pl-8 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full text-sm" placeholder="0.00">
+                                        <input type="number" step="0.01" min="0" wire:model.live.debounce.300ms="extra_works.{{ $index }}.price" class="pl-8 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full text-sm bg-gray-100" readonly placeholder="0.00">
                                     </div>
                                     <button type="button" wire:click="removeExtraWork({{ $index }})" class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
