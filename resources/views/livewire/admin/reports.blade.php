@@ -8,17 +8,7 @@
                     </svg>
                     {{ __('Analíticas y Reportes de Gestión') }}
                 </h2>
-                <p class="text-xs text-gray-500 mt-1">Monitorea la productividad, finanzas y operaciones del laboratorio dental en tiempo real.</p>
-            </div>
-            
-            {{-- Filtro de Periodo Global --}}
-            <div class="bg-white p-1.5 rounded-xl border border-gray-200 shadow-sm flex space-x-1">
-                <button wire:click="setPeriod('weekly')" class="px-4 py-2 text-xs font-bold rounded-lg transition-all {{ $period === 'weekly' ? 'bg-indigo-600 text-white shadow-md' : 'text-gray-600 hover:text-indigo-600 hover:bg-indigo-50/50' }}">
-                    📅 Vista Semanal
-                </button>
-                <button wire:click="setPeriod('monthly')" class="px-4 py-2 text-xs font-bold rounded-lg transition-all {{ $period === 'monthly' ? 'bg-indigo-600 text-white shadow-md' : 'text-gray-600 hover:text-indigo-600 hover:bg-indigo-50/50' }}">
-                    📊 Vista Mensual
-                </button>
+                <p class="text-xs text-gray-500 mt-1">Filtra, analiza y descarga estadísticas operativas y financieras del laboratorio dental en tiempo real.</p>
             </div>
         </div>
     </x-slot>
@@ -26,13 +16,60 @@
     <div class="py-8 bg-gray-50/50 min-h-screen font-sans">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
 
-            {{-- 1. Tarjetas de Indicadores Clave (KPIs) con Máximo Contraste y Claridad --}}
+            {{-- 1. Panel de Control de Filtros Globales (Accesible y Dinámico) --}}
+            <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 md:p-8">
+                <div class="flex items-center space-x-3 mb-6">
+                    <span class="text-xl">🎛️</span>
+                    <h3 class="font-bold text-gray-800 text-base">Filtros de Análisis del Laboratorio</h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label for="startDate" class="block text-xs font-bold text-gray-700 mb-1.5">Fecha de Inicio *</label>
+                        <input type="date" wire:model="startDate" id="startDate" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full text-sm">
+                        @error('startDate') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+                    <div>
+                        <label for="endDate" class="block text-xs font-bold text-gray-700 mb-1.5">Fecha de Fin *</label>
+                        <input type="date" wire:model="endDate" id="endDate" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full text-sm">
+                        @error('endDate') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+                    <div>
+                        <label for="areaId" class="block text-xs font-bold text-gray-700 mb-1.5">Área Operativa (Opcional)</label>
+                        <select wire:model="areaId" id="areaId" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full bg-white text-sm">
+                            <option value="">-- Todas las Áreas --</option>
+                            @foreach($areas as $area)
+                                <option value="{{ $area->id }}">{{ $area->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mt-6 pt-6 border-t border-gray-100">
+                    <div class="text-xs text-gray-400">
+                        * Todos los gráficos y KPIs se recalculan automáticamente en base a tu selección de fechas.
+                    </div>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <button wire:click="resetFilters" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-5 rounded-lg text-xs shadow-sm transition duration-150 flex items-center justify-center">
+                            🔄 Limpiar
+                        </button>
+                        <button wire:click="applyFilters" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-lg text-xs shadow-md transition duration-150 flex items-center justify-center">
+                            📊 Filtrar Dashboard
+                        </button>
+                        <button wire:click="downloadReport" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-5 rounded-lg text-xs shadow-md transition duration-150 flex items-center justify-center">
+                            📥 Descargar ETL CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {{-- 2. Tarjetas de Indicadores Clave (KPIs) con Máximo Contraste y Claridad --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <!-- Facturación Total -->
                 <div class="bg-white rounded-2xl shadow-xl p-6 border-l-4 border-indigo-600 transform hover:-translate-y-0.5 transition duration-200">
                     <div class="flex justify-between items-start">
                         <div>
-                            <p class="text-gray-400 text-[10px] font-black uppercase tracking-wider">Facturación Total</p>
+                            <p class="text-gray-400 text-[10px] font-black uppercase tracking-wider">Facturación Rango</p>
                             <h3 class="text-2xl font-black mt-2 text-gray-900 font-mono">S/ {{ number_format($kpis['total_earnings'], 2) }}</h3>
                         </div>
                         <span class="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl text-lg font-bold">
@@ -40,7 +77,7 @@
                         </span>
                     </div>
                     <div class="mt-4 flex items-center text-xs text-gray-400">
-                        <span class="font-bold text-indigo-600 mr-1">Histórico</span> de órdenes finalizadas.
+                        Suma de órdenes finalizadas en rango.
                     </div>
                 </div>
 
@@ -72,7 +109,7 @@
                         </span>
                     </div>
                     <div class="mt-4 flex items-center text-xs text-gray-400">
-                        <span class="font-bold text-emerald-500 mr-1">Rendimiento medio</span> por orden.
+                        Rendimiento medio por orden en rango.
                     </div>
                 </div>
 
@@ -88,19 +125,19 @@
                         </span>
                     </div>
                     <div class="mt-4 flex items-center text-xs text-gray-400">
-                        <span class="font-bold text-orange-500 mr-1">Entregas a tiempo</span> en clínica.
+                        Entregas a tiempo en clínica.
                     </div>
                 </div>
             </div>
 
-            {{-- 2. Panel Principal de Gráficos de Líneas (Producción e Ingresos) --}}
+            {{-- 3. Panel Principal de Gráficos de Líneas (Producción e Ingresos) --}}
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <!-- Gráfico de Producción -->
                 <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-6" wire:ignore>
                     <div class="flex justify-between items-center mb-6">
                         <div>
                             <h4 class="font-black text-gray-800 text-base">Volumen de Producción</h4>
-                            <p class="text-xs text-gray-400">Órdenes Creadas vs Completadas en el periodo.</p>
+                            <p class="text-xs text-gray-400">Órdenes Creadas vs Completadas en el rango de fechas.</p>
                         </div>
                     </div>
                     <div class="h-80 w-full">
@@ -122,7 +159,7 @@
                 </div>
             </div>
 
-            {{-- 3. Distribuciones y Métricas Analíticas Detalladas --}}
+            {{-- 4. Distribuciones y Métricas Analíticas Detalladas --}}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <!-- Distribución por Trabajo Protésico (Servicios más pedidos) -->
                 <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 flex flex-col justify-between" wire:ignore>
@@ -158,56 +195,6 @@
                 </div>
             </div>
 
-            {{-- 4. Sección de Exportación de Datos (ETL) --}}
-            <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-                <div class="bg-indigo-600 px-6 py-4 flex items-center justify-between">
-                    <h3 class="text-base font-bold text-white flex items-center">
-                        📥 Exportador de Reportes Analíticos (ETL)
-                    </h3>
-                </div>
-                <div class="p-6 md:p-8">
-                    <p class="text-xs text-gray-500 mb-6">
-                        Selecciona un rango de fechas y descarga un conjunto de datos crudos formateado en CSV para análisis externo avanzado en Excel o PowerBI.
-                    </p>
-                    <form wire:submit="downloadReport" class="space-y-6">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div>
-                                <label for="startDate" class="block text-xs font-bold text-gray-700 mb-1.5">Fecha de Inicio *</label>
-                                <input type="date" wire:model="startDate" id="startDate" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full text-sm">
-                                @error('startDate') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
-                            </div>
-                            <div>
-                                <label for="endDate" class="block text-xs font-bold text-gray-700 mb-1.5">Fecha de Fin *</label>
-                                <input type="date" wire:model="endDate" id="endDate" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full text-sm">
-                                @error('endDate') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
-                            </div>
-                            <div>
-                                <label for="areaId" class="block text-xs font-bold text-gray-700 mb-1.5">Área Operativa (Opcional)</label>
-                                <select wire:model="areaId" id="areaId" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full bg-white text-sm">
-                                    <option value="">-- Todas las Áreas --</option>
-                                    @foreach($areas as $area)
-                                        <option value="{{ $area->id }}">{{ $area->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center justify-end pt-4 border-t border-gray-100">
-                            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-5 rounded-lg text-xs shadow-md transition duration-150 ease-in-out flex items-center">
-                                <svg wire:loading.remove wire:target="downloadReport" class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                                </svg>
-                                <svg wire:loading wire:target="downloadReport" class="animate-spin -ml-0.5 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                Descargar Reporte CSV
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
         </div>
     </div>
 
@@ -218,7 +205,7 @@
             const ctxProd = document.getElementById('productionChart');
             if (!ctxProd) return; // Salir silenciosamente si el elemento no existe en la vista actual
 
-            let productionChart, financialChart;
+            let productionChart, financialChart, catalogChart, areasChart, clientChart;
 
             // Datos de inicialización desde Laravel
             const initialData = @json($initialChartData);
@@ -295,7 +282,7 @@
 
             // ─── 3. DISTRIBUCIÓN DE TRABAJO PROTÉSICO ───
             const ctxCat = document.getElementById('catalogChart').getContext('2d');
-            new Chart(ctxCat, {
+            catalogChart = new Chart(ctxCat, {
                 type: 'doughnut',
                 data: {
                     labels: catalogData.map(c => c.label),
@@ -318,7 +305,7 @@
 
             // ─── 4. PRODUCTIVIDAD DE ÁREAS ───
             const ctxAreas = document.getElementById('areasChart').getContext('2d');
-            new Chart(ctxAreas, {
+            areasChart = new Chart(ctxAreas, {
                 type: 'bar',
                 data: {
                     labels: areaData.map(a => a.label),
@@ -342,7 +329,7 @@
 
             // ─── 5. SEGMENTACIÓN DE CLIENTES ───
             const ctxCli = document.getElementById('clientChart').getContext('2d');
-            new Chart(ctxCli, {
+            clientChart = new Chart(ctxCli, {
                 type: 'pie',
                 data: {
                     labels: clientData.map(c => c.label),
@@ -362,20 +349,36 @@
                 }
             });
 
-            // Definir función de actualización como un manejador nombrado para evitar duplicidades
+            // Definir función de actualización completa para todos los 5 gráficos
             const onChartsUpdated = (event) => {
                 const data = event.detail.chartData;
+                const main = data.mainCharts;
 
-                // Actualizar Producción
-                productionChart.data.labels = data.labels;
-                productionChart.data.datasets[0].data = data.created;
-                productionChart.data.datasets[1].data = data.completed;
+                // 1. Actualizar Producción
+                productionChart.data.labels = main.labels;
+                productionChart.data.datasets[0].data = main.created;
+                productionChart.data.datasets[1].data = main.completed;
                 productionChart.update();
 
-                // Actualizar Financiero
-                financialChart.data.labels = data.labels;
-                financialChart.data.datasets[0].data = data.earnings;
+                // 2. Actualizar Financiero
+                financialChart.data.labels = main.labels;
+                financialChart.data.datasets[0].data = main.earnings;
                 financialChart.update();
+
+                // 3. Actualizar Distribución Catálogo
+                catalogChart.data.labels = data.catalogDistribution.map(c => c.label);
+                catalogChart.data.datasets[0].data = data.catalogDistribution.map(c => c.total);
+                catalogChart.update();
+
+                // 4. Actualizar Productividad Áreas
+                areasChart.data.labels = data.areaProductivity.map(a => a.label);
+                areasChart.data.datasets[0].data = data.areaProductivity.map(a => a.total);
+                areasChart.update();
+
+                // 5. Actualizar Segmentación Clientes
+                clientChart.data.labels = data.clientTypeDistribution.map(c => c.label);
+                clientChart.data.datasets[0].data = data.clientTypeDistribution.map(c => c.total);
+                clientChart.update();
             };
 
             // Escuchar el evento reactivo de forma global

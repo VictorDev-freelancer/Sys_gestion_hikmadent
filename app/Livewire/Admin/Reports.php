@@ -11,101 +11,230 @@ use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 
+/**
+ * Reports Component
+ *
+ * [SOLID - SRP] Proporciona análisis dinámico de negocio (Business Intelligence).
+ * Permite filtrar KPIs y 5 gráficos diferentes por rango de fecha y área.
+ */
 #[Layout('layouts.app')]
 class Reports extends Component
 {
     public $startDate;
     public $endDate;
     public $areaId = '';
-    public $period = 'monthly'; // 'weekly' o 'monthly'
 
     public function mount()
     {
-        // Por defecto el mes actual para el exportador
-        $this->startDate = now()->startOfMonth()->format('Y-m-d');
-        $this->endDate   = now()->endOfMonth()->format('Y-m-d');
+        // Por defecto: desde el primer día del mes anterior hasta hoy para dar un rango de análisis visible
+        $this->startDate = now()->subMonth()->startOfMonth()->format('Y-m-d');
+        $this->endDate   = now()->format('Y-m-d');
     }
 
-    public function setPeriod($period)
+    /**
+     * Aplica los filtros de fecha y área, despachando los datos actualizados a todos los gráficos.
+     */
+    public function applyFilters()
     {
-        $this->period = $period;
-        $this->dispatch('charts-updated', chartData: $this->getChartData());
+        $this->validate([
+            'startDate' => 'required|date',
+            'endDate'   => 'required|date|after_or_equal:startDate',
+            'areaId'    => 'nullable|exists:areas,id',
+        ]);
+
+        $this->dispatch('charts-updated', chartData: [
+            'mainCharts'             => $this->getChartData(),
+            'catalogDistribution'    => $this->getCatalogDistribution(),
+            'areaProductivity'       => $this->getAreaProductivity(),
+            'clientTypeDistribution' => $this->getClientTypeDistribution(),
+        ]);
     }
 
+    /**
+     * Reajusta los filtros de vuelta a los valores predeterminados y actualiza.
+     */
+    public function resetFilters()
+    {
+        $this->startDate = now()->subMonth()->startOfMonth()->format('Y-m-d');
+        $this->endDate   = now()->format('Y-m-d');
+        $this->areaId    = '';
+
+        $this->applyFilters();
+    }
+
+    /**
+     * Genera datos de producción y finanzas segmentados automáticamente según la escala del tiempo.
+     */
     public function getChartData()
     {
+        $start = Carbon::parse($this->startDate)->startOfDay();
+        $end = Carbon::parse($this->endDate)->endOfDay();
+        
+        $diffInDays = $start->diffInDays($end);
+        
         $labels = [];
         $createdData = [];
         $completedData = [];
         $earningsData = [];
 
-        if ($this->period === 'weekly') {
-            for ($i = 7; $i >= 0; $i--) {
-                $date = now()->subWeeks($i);
-                $start = $date->copy()->startOfWeek();
-                $end = $date->copy()->endOfWeek();
+        if ($diffInDays <= 14) {
+            // Escala Diaria (Rango pequeño)
+            $current = $start->copy();
+            while ($current->lte($end)) {
+                $dayStart = $current->copy()->startOfDay();
+                $dayEnd = $current->copy()->endOfDay();
                 
-                $labels[] = 'Sem ' . $date->format('W') . ' (' . $start->format('d/m') . ')';
+                $labels[] = $current->format('d/m');
                 
-                $createdData[] = WorkOrder::whereBetween('created_at', [$start, $end])->count();
-                $completedData[] = WorkOrder::whereBetween('created_at', [$start, $end])->whereIn('status', ['completed', 'delivered'])->count();
-                $earningsData[] = (float) WorkOrder::whereBetween('created_at', [$start, $end])->whereIn('status', ['completed', 'delivered'])->sum('total_price');
+                $createdQuery = WorkOrder::whereBetween('created_at', [$dayStart, $dayEnd]);
+                $completedQuery = WorkOrder::whereBetween('created_at', [$dayStart, $dayEnd])->whereIn('status', ['completed', 'delivered']);
+
+                if ($this->areaId) {
+                    $createdQuery->whereHas('workOrderAreas', function ($q) { $q->where('area_id', $this->areaId); });
+                    $completedQuery->whereHas('workOrderAreas', function ($q) { $q->where('area_id', $this->areaId); });
+                }
+
+                $createdData[]   = $createdQuery->count();
+                $completedData[] = $completedQuery->count();
+                $earningsData[]  = (float) $completedQuery->sum('total_price');
+                
+                $current->addDay();
+            }
+        } elseif ($diffInDays <= 90) {
+            // Escala Semanal (Rango mediano)
+            $current = $start->copy();
+            while ($current->lte($end)) {
+                $weekStart = $current->copy()->startOfWeek();
+                $weekEnd = $current->copy()->endOfWeek();
+                
+                if ($weekStart->lt($start)) $weekStart = $start->copy();
+                if ($weekEnd->gt($end)) $weekEnd = $end->copy();
+                
+                $labels[] = 'Sem ' . $current->format('W') . ' (' . $weekStart->format('d/m') . ')';
+                
+                $createdQuery = WorkOrder::whereBetween('created_at', [$weekStart, $weekEnd]);
+                $completedQuery = WorkOrder::whereBetween('created_at', [$weekStart, $weekEnd])->whereIn('status', ['completed', 'delivered']);
+
+                if ($this->areaId) {
+                    $createdQuery->whereHas('workOrderAreas', function ($q) { $q->where('area_id', $this->areaId); });
+                    $completedQuery->whereHas('workOrderAreas', function ($q) { $q->where('area_id', $this->areaId); });
+                }
+
+                $createdData[]   = $createdQuery->count();
+                $completedData[] = $completedQuery->count();
+                $earningsData[]  = (float) $completedQuery->sum('total_price');
+                
+                $current->addWeek();
             }
         } else {
-            for ($i = 5; $i >= 0; $i--) {
-                $date = now()->subMonths($i);
-                $start = $date->copy()->startOfMonth();
-                $end = $date->copy()->endOfMonth();
+            // Escala Mensual (Rango grande)
+            $current = $start->copy();
+            while ($current->lte($end)) {
+                $monthStart = $current->copy()->startOfMonth();
+                $monthEnd = $current->copy()->endOfMonth();
                 
-                $labels[] = ucfirst($date->locale('es')->shortMonthName) . ' ' . $date->format('y');
+                if ($monthStart->lt($start)) $monthStart = $start->copy();
+                if ($monthEnd->gt($end)) $monthEnd = $end->copy();
                 
-                $createdData[] = WorkOrder::whereBetween('created_at', [$start, $end])->count();
-                $completedData[] = WorkOrder::whereBetween('created_at', [$start, $end])->whereIn('status', ['completed', 'delivered'])->count();
-                $earningsData[] = (float) WorkOrder::whereBetween('created_at', [$start, $end])->whereIn('status', ['completed', 'delivered'])->sum('total_price');
+                $labels[] = ucfirst($current->locale('es')->shortMonthName) . ' ' . $current->format('y');
+                
+                $createdQuery = WorkOrder::whereBetween('created_at', [$monthStart, $monthEnd]);
+                $completedQuery = WorkOrder::whereBetween('created_at', [$monthStart, $monthEnd])->whereIn('status', ['completed', 'delivered']);
+
+                if ($this->areaId) {
+                    $createdQuery->whereHas('workOrderAreas', function ($q) { $q->where('area_id', $this->areaId); });
+                    $completedQuery->whereHas('workOrderAreas', function ($q) { $q->where('area_id', $this->areaId); });
+                }
+
+                $createdData[]   = $createdQuery->count();
+                $completedData[] = $completedQuery->count();
+                $earningsData[]  = (float) $completedQuery->sum('total_price');
+                
+                $current->addMonth();
             }
         }
 
         return [
-            'labels' => $labels,
-            'created' => $createdData,
+            'labels'    => $labels,
+            'created'   => $createdData,
             'completed' => $completedData,
-            'earnings' => $earningsData,
+            'earnings'  => $earningsData,
         ];
     }
 
+    /**
+     * Calcula los KPIs financieros y operacionales filtrados.
+     */
     public function getKpis()
     {
-        $totalOrders = WorkOrder::count();
-        $completedOrders = WorkOrder::whereIn('status', ['completed', 'delivered'])->count();
-        $totalEarnings = WorkOrder::whereIn('status', ['completed', 'delivered'])->sum('total_price');
-        $averageTicket = $completedOrders > 0 ? $totalEarnings / $completedOrders : 0;
+        $start = Carbon::parse($this->startDate)->startOfDay();
+        $end = Carbon::parse($this->endDate)->endOfDay();
+
+        $query = WorkOrder::whereBetween('created_at', [$start, $end]);
+        if ($this->areaId) {
+            $query->whereHas('workOrderAreas', function ($q) {
+                $q->where('area_id', $this->areaId);
+            });
+        }
+        $totalOrders = $query->count();
+        
+        $completedQuery = WorkOrder::whereBetween('created_at', [$start, $end])
+            ->whereIn('status', ['completed', 'delivered']);
+        if ($this->areaId) {
+            $completedQuery->whereHas('workOrderAreas', function ($q) {
+                $q->where('area_id', $this->areaId);
+            });
+        }
+        $completedOrders = $completedQuery->count();
+        $totalEarnings   = $completedQuery->sum('total_price');
+        $averageTicket   = $completedOrders > 0 ? $totalEarnings / $completedOrders : 0;
         
         // Eficiencia de entrega: % de órdenes finalizadas a tiempo
-        $onTimeOrders = WorkOrder::whereIn('status', ['completed', 'delivered'])
+        $onTimeQuery = WorkOrder::whereBetween('created_at', [$start, $end])
+            ->whereIn('status', ['completed', 'delivered'])
             ->whereNotNull('delivery_date')
             ->where(function($q) {
                 $q->whereNull('delivery_date')
                   ->orWhere('delivery_date', '>=', DB::raw('created_at'));
-            })
-            ->count();
+            });
+        if ($this->areaId) {
+            $onTimeQuery->whereHas('workOrderAreas', function ($q) {
+                $q->where('area_id', $this->areaId);
+            });
+        }
+        $onTimeOrders = $onTimeQuery->count();
         
         $onTimePercentage = $completedOrders > 0 ? ($onTimeOrders / $completedOrders) * 100 : 100;
 
         return [
-            'total_orders' => $totalOrders,
-            'completed_orders' => $completedOrders,
-            'total_earnings' => (float) $totalEarnings,
-            'average_ticket' => (float) $averageTicket,
+            'total_orders'       => $totalOrders,
+            'completed_orders'   => $completedOrders,
+            'total_earnings'     => (float) $totalEarnings,
+            'average_ticket'     => (float) $averageTicket,
             'on_time_percentage' => (float) $onTimePercentage,
         ];
     }
 
+    /**
+     * Distribución de trabajos del catálogo.
+     */
     public function getCatalogDistribution()
     {
-        return WorkOrder::select('catalog_item_id', DB::raw('count(*) as total'))
+        $start = Carbon::parse($this->startDate)->startOfDay();
+        $end = Carbon::parse($this->endDate)->endOfDay();
+
+        $query = WorkOrder::select('catalog_item_id', DB::raw('count(*) as total'))
             ->with('catalogItem')
-            ->whereNotNull('catalog_item_id')
-            ->groupBy('catalog_item_id')
+            ->whereBetween('created_at', [$start, $end])
+            ->whereNotNull('catalog_item_id');
+
+        if ($this->areaId) {
+            $query->whereHas('workOrderAreas', function ($q) {
+                $q->where('area_id', $this->areaId);
+            });
+        }
+
+        return $query->groupBy('catalog_item_id')
             ->orderByDesc('total')
             ->take(5)
             ->get()
@@ -117,12 +246,24 @@ class Reports extends Component
             })->toArray();
     }
 
+    /**
+     * Productividad de las áreas (procesamientos completados).
+     */
     public function getAreaProductivity()
     {
-        return WorkOrderArea::select('area_id', DB::raw('count(*) as total'))
+        $start = Carbon::parse($this->startDate)->startOfDay();
+        $end = Carbon::parse($this->endDate)->endOfDay();
+
+        $query = WorkOrderArea::select('area_id', DB::raw('count(*) as total'))
             ->with('area')
-            ->where('kanban_status', 'completed')
-            ->groupBy('area_id')
+            ->whereBetween('created_at', [$start, $end])
+            ->where('kanban_status', 'completed');
+
+        if ($this->areaId) {
+            $query->where('area_id', $this->areaId);
+        }
+
+        return $query->groupBy('area_id')
             ->orderByDesc('total')
             ->get()
             ->map(function ($woa) {
@@ -133,29 +274,30 @@ class Reports extends Component
             })->toArray();
     }
 
+    /**
+     * Distribución por tipo de cliente.
+     */
     public function getClientTypeDistribution()
     {
-        return WorkOrder::select('client_type', DB::raw('count(*) as total, sum(total_price) as earnings'))
-            ->groupBy('client_type')
+        $start = Carbon::parse($this->startDate)->startOfDay();
+        $end = Carbon::parse($this->endDate)->endOfDay();
+
+        $query = WorkOrder::select('client_type', DB::raw('count(*) as total, sum(total_price) as earnings'))
+            ->whereBetween('created_at', [$start, $end]);
+
+        if ($this->areaId) {
+            $query->whereHas('workOrderAreas', function ($q) {
+                $q->where('area_id', $this->areaId);
+            });
+        }
+
+        return $query->groupBy('client_type')
             ->get()
             ->map(function ($wo) {
                 return [
-                    'label' => $wo->client_type === 'student' ? 'Estudiantes' : 'Persona Natural / Clínicas',
+                    'label' => $wo->client_type === 'student' ? 'Estudiantes' : 'Odontólogos / Clínicas',
                     'total' => $wo->total,
                     'earnings' => (float) $wo->earnings
-                ];
-            })->toArray();
-    }
-
-    public function getPriorityDistribution()
-    {
-        return WorkOrder::select('priority', DB::raw('count(*) as total'))
-            ->groupBy('priority')
-            ->get()
-            ->map(function ($wo) {
-                return [
-                    'label' => ucfirst($wo->priority?->value ?? 'normal'),
-                    'total' => $wo->total
                 ];
             })->toArray();
     }
@@ -178,13 +320,12 @@ class Reports extends Component
     public function render()
     {
         return view('livewire.admin.reports', [
-            'areas' => Area::active()->ordered()->get(),
-            'kpis' => $this->getKpis(),
-            'initialChartData' => $this->getChartData(),
-            'catalogDistribution' => $this->getCatalogDistribution(),
-            'areaProductivity' => $this->getAreaProductivity(),
+            'areas'                  => Area::active()->ordered()->get(),
+            'kpis'                   => $this->getKpis(),
+            'initialChartData'       => $this->getChartData(),
+            'catalogDistribution'    => $this->getCatalogDistribution(),
+            'areaProductivity'       => $this->getAreaProductivity(),
             'clientTypeDistribution' => $this->getClientTypeDistribution(),
-            'priorityDistribution' => $this->getPriorityDistribution(),
         ]);
     }
 }
