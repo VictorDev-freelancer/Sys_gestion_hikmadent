@@ -28,6 +28,10 @@
                     <x-nav-link href="{{ route('admin.users') }}" :active="request()->routeIs('admin.users')">
                         👥 {{ __('Personal') }}
                     </x-nav-link>
+
+                    <x-nav-link href="{{ route('admin.reports') }}" :active="request()->routeIs('admin.reports')">
+                        📊 {{ __('Reportes') }}
+                    </x-nav-link>
                     @endhasanyrole
 
                     {{-- Links dinámicos a áreas según el rol del usuario --}}
@@ -190,6 +194,10 @@
 
             <x-responsive-nav-link href="{{ route('admin.users') }}" :active="request()->routeIs('admin.users')">
                 👥 {{ __('Control de Personal') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link href="{{ route('admin.reports') }}" :active="request()->routeIs('admin.reports')">
+                📊 {{ __('Reportes y Analíticas') }}
             </x-responsive-nav-link>
             @endhasanyrole
 
