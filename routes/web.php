@@ -36,9 +36,9 @@ Route::middleware([
         Route::get('/reportes', Reports::class)
             ->name('admin.reports');
 
-        // Módulo Exclusivo para Gestión de Usuarios
+        // Control y Gestión de Personal (Accesible para Super usuario y Administración)
         Route::get('/usuarios', UserManagement::class)
-            ->middleware('role:Super usuario') // Este requiere super admin puro
+            ->middleware('role:Super usuario|Administración')
             ->name('admin.users');
 
         // Órdenes de Trabajo (Listado General)

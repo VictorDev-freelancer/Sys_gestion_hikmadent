@@ -24,6 +24,10 @@
                     <x-nav-link href="{{ route('inventory.dashboard') }}" :active="request()->routeIs('inventory.*')">
                         📦 {{ __('Inventario') }}
                     </x-nav-link>
+
+                    <x-nav-link href="{{ route('admin.users') }}" :active="request()->routeIs('admin.users')">
+                        👥 {{ __('Personal') }}
+                    </x-nav-link>
                     @endhasanyrole
 
                     {{-- Links dinámicos a áreas según el rol del usuario --}}
@@ -43,14 +47,10 @@
                     @endforeach
 
                     @role('Super usuario')
-                    <x-nav-link href="{{ route('admin.users') }}" :active="request()->routeIs('admin.users')">
-                        {{ __('Usuarios') }}
-                    </x-nav-link>
-                    
                     <x-nav-link href="{{ route('admin.catalog.index') }}" :active="request()->routeIs('admin.catalog.*')">
                         {{ __('Catálogo') }}
                     </x-nav-link>
-                @endrole
+                    @endrole
                 </div>
             </div>
 
@@ -187,6 +187,10 @@
             <x-responsive-nav-link href="{{ route('inventory.dashboard') }}" :active="request()->routeIs('inventory.*')">
                 📦 {{ __('Inventario') }}
             </x-responsive-nav-link>
+
+            <x-responsive-nav-link href="{{ route('admin.users') }}" :active="request()->routeIs('admin.users')">
+                👥 {{ __('Control de Personal') }}
+            </x-responsive-nav-link>
             @endhasanyrole
 
             @php
@@ -205,10 +209,6 @@
             @endforeach
 
             @role('Super usuario')
-                <x-responsive-nav-link href="{{ route('admin.users') }}" :active="request()->routeIs('admin.users')">
-                    {{ __('Control de Personal') }}
-                </x-responsive-nav-link>
-
                 <x-responsive-nav-link href="{{ route('admin.catalog.index') }}" :active="request()->routeIs('admin.catalog.*')">
                     {{ __('Catálogo') }}
                 </x-responsive-nav-link>
