@@ -312,16 +312,17 @@
         .fc-event-tooltip { position: fixed; z-index: 9999; background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.12); pointer-events: none; min-width: 240px; max-width: 300px; }
     </style>
 
-    {{-- Scripts de Chart.js para el Dashboard Administrativo --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('livewire:navigated', () => {
+            const ctxDbProd = document.getElementById('dashboardProductionChart');
+            if (!ctxDbProd) return; // Exit if not in this page
+
             let dbProdChart, dbFinChart;
             const initialChartData = @json($initialChartData);
 
             // ─── 1. GRÁFICO DE PRODUCCIÓN (Creadas vs Completadas) ───
-            const ctxDbProd = document.getElementById('dashboardProductionChart').getContext('2d');
-            dbProdChart = new Chart(ctxDbProd, {
+            dbProdChart = new Chart(ctxDbProd.getContext('2d'), {
                 type: 'line',
                 data: {
                     labels: initialChartData.labels,
@@ -388,7 +389,7 @@
             });
 
             // Escuchar actualizaciones reactivas nativas de window
-            window.addEventListener('charts-updated', (event) => {
+            const onDbChartsUpdated = (event) => {
                 const data = event.detail.chartData;
 
                 dbProdChart.data.labels = data.labels;
@@ -399,8 +400,16 @@
                 dbFinChart.data.labels = data.labels;
                 dbFinChart.data.datasets[0].data = data.earnings;
                 dbFinChart.update();
-            });
+            };
+
+            window.addEventListener('charts-updated', onDbChartsUpdated);
+
+            // Cleanup when navigating away
+            document.addEventListener('livewire:navigating', () => {
+                window.removeEventListener('charts-updated', onDbChartsUpdated);
+            }, { once: true });
         });
     </script>
+
 </div>
 

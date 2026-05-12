@@ -211,10 +211,14 @@
         </div>
     </div>
 
-    {{-- SCRIPTS DE CHART.JS CON MÁXIMA REACTIVIDAD DE EVENTOS NATIVOS --}}
+    {{-- SCRIPTS DE CHART.JS CON MÁXIMA REACTIVIDAD DE EVENTOS NATIVOS Y SOPORTE DE LIVEWIRE NAVIGATE --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        // Usar livewire:navigated para inicializar de forma segura y reactiva bajo cualquier navegación wire:navigate
+        document.addEventListener('livewire:navigated', () => {
+            const ctxProd = document.getElementById('productionChart');
+            if (!ctxProd) return; // Salir silenciosamente si el elemento no existe en la vista actual
+
             let productionChart, financialChart;
 
             // Datos de inicialización desde Laravel
@@ -224,8 +228,7 @@
             const clientData = @json($clientTypeDistribution);
 
             // ─── 1. GRÁFICO DE PRODUCCIÓN (Creadas vs Completadas) ───
-            const ctxProd = document.getElementById('productionChart').getContext('2d');
-            productionChart = new Chart(ctxProd, {
+            productionChart = new Chart(ctxProd.getContext('2d'), {
                 type: 'line',
                 data: {
                     labels: initialData.labels,
@@ -360,8 +363,8 @@
                 }
             });
 
-            // ─── ESCUCHAR ACTUALIZACIONES REACTIVAS NATIVAS DE WINDOW ───
-            window.addEventListener('charts-updated', (event) => {
+            // Definir función de actualización como un manejador nombrado para evitar duplicidades
+            const onChartsUpdated = (event) => {
                 const data = event.detail.chartData;
 
                 // Actualizar Producción
@@ -374,7 +377,15 @@
                 financialChart.data.labels = data.labels;
                 financialChart.data.datasets[0].data = data.earnings;
                 financialChart.update();
-            });
+            };
+
+            // Escuchar el evento reactivo de forma global
+            window.addEventListener('charts-updated', onChartsUpdated);
+
+            // Limpieza del EventListener al navegar fuera para que no queden referencias colgadas en el SPA
+            document.addEventListener('livewire:navigating', () => {
+                window.removeEventListener('charts-updated', onChartsUpdated);
+            }, { once: true });
         });
     </script>
 </div>
