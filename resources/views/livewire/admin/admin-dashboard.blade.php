@@ -48,6 +48,45 @@
                 </div>
             </div>
 
+            {{-- Fila: Gráficos Interactivos con Selector de Periodo --}}
+            <div class="bg-white rounded-xl shadow-xl overflow-hidden border border-gray-150">
+                <div class="px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center bg-gray-50 border-b border-gray-150 space-y-4 md:space-y-0">
+                    <div>
+                        <h3 class="font-bold text-gray-850 text-base flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            Analíticas de Producción y Facturación Real
+                        </h3>
+                        <p class="text-[11px] text-gray-400">Rendimiento operacional y flujos de ingresos facturados.</p>
+                    </div>
+                    <div class="bg-white p-1 rounded-lg border border-gray-200 shadow-sm flex space-x-1">
+                        <button wire:click="setPeriod('weekly')" class="px-3 py-1.5 text-xs font-bold rounded transition-all {{ $period === 'weekly' ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-500 hover:text-indigo-600' }}">
+                            📅 Vista Semanal
+                        </button>
+                        <button wire:click="setPeriod('monthly')" class="px-3 py-1.5 text-xs font-bold rounded transition-all {{ $period === 'monthly' ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-500 hover:text-indigo-600' }}">
+                            📊 Vista Mensual
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6 grid grid-cols-1 lg:grid-cols-2 gap-8 bg-white">
+                    {{-- Gráfico de Producción --}}
+                    <div wire:ignore class="h-80 w-full relative">
+                        <h4 class="text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Flujo de Órdenes de Trabajo (Creadas vs Completadas)</h4>
+                        <div class="h-[250px]">
+                            <canvas id="dashboardProductionChart"></canvas>
+                        </div>
+                    </div>
+                    {{-- Gráfico Financiero --}}
+                    <div wire:ignore class="h-80 w-full relative">
+                        <h4 class="text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Volumen de Facturación en Soles (S/.)</h4>
+                        <div class="h-[250px]">
+                            <canvas id="dashboardFinancialChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {{-- ═══ FULLCALENDAR — Calendario de Órdenes Pendientes ═══ --}}
             <div class="bg-white rounded-xl shadow-xl overflow-hidden">
                 <div class="px-6 py-4 flex items-center justify-between" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);border-bottom:2px solid #4338ca">
@@ -272,5 +311,100 @@
         #admin-calendar .fc-col-header-cell { background: #f9fafb; font-weight: 700 !important; text-transform: uppercase !important; font-size: 0.7rem !important; color: #6b7280 !important; }
         .fc-event-tooltip { position: fixed; z-index: 9999; background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.12); pointer-events: none; min-width: 240px; max-width: 300px; }
     </style>
+
+    {{-- Scripts de Chart.js para el Dashboard Administrativo --}}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let dbProdChart, dbFinChart;
+            const initialChartData = @json($initialChartData);
+
+            // ─── 1. GRÁFICO DE PRODUCCIÓN (Creadas vs Completadas) ───
+            const ctxDbProd = document.getElementById('dashboardProductionChart').getContext('2d');
+            dbProdChart = new Chart(ctxDbProd, {
+                type: 'line',
+                data: {
+                    labels: initialChartData.labels,
+                    datasets: [
+                        {
+                            label: 'Órdenes Creadas',
+                            data: initialChartData.created,
+                            borderColor: '#4f46e5',
+                            backgroundColor: 'rgba(79, 70, 229, 0.05)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Órdenes Completadas',
+                            data: initialChartData.completed,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.05)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', labels: { boxWidth: 12, font: { weight: 'bold', size: 11 } } }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f3f4f6' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // ─── 2. GRÁFICO FINANCIERO (Ingresos) ───
+            const ctxDbFin = document.getElementById('dashboardFinancialChart').getContext('2d');
+            dbFinChart = new Chart(ctxDbFin, {
+                type: 'bar',
+                data: {
+                    labels: initialChartData.labels,
+                    datasets: [{
+                        label: 'Facturación (S/.)',
+                        data: initialChartData.earnings,
+                        backgroundColor: 'rgba(139, 92, 246, 0.85)',
+                        hoverBackgroundColor: '#8b5cf6',
+                        borderRadius: 6,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f3f4f6' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // Escuchar actualizaciones de Livewire para refrescar los gráficos
+            document.addEventListener('livewire:init', () => {
+                Livewire.on('chartsUpdated', (event) => {
+                    const data = event[0].chartData;
+
+                    dbProdChart.data.labels = data.labels;
+                    dbProdChart.data.datasets[0].data = data.created;
+                    dbProdChart.data.datasets[1].data = data.completed;
+                    dbProdChart.buildOrUpdateControllers();
+                    dbProdChart.update();
+
+                    dbFinChart.data.labels = data.labels;
+                    dbFinChart.data.datasets[0].data = data.earnings;
+                    dbFinChart.buildOrUpdateControllers();
+                    dbFinChart.update();
+                });
+            });
+        });
+    </script>
 </div>
 

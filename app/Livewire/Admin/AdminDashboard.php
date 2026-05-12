@@ -91,6 +91,57 @@ class AdminDashboard extends Component
         })->values()->toArray();
     }
 
+    public $period = 'monthly'; // 'weekly' o 'monthly'
+
+    public function setPeriod($period)
+    {
+        $this->period = $period;
+        $this->dispatch('chartsUpdated', [
+            'chartData' => $this->getChartData()
+        ]);
+    }
+
+    public function getChartData()
+    {
+        $labels = [];
+        $createdData = [];
+        $completedData = [];
+        $earningsData = [];
+
+        if ($this->period === 'weekly') {
+            for ($i = 7; $i >= 0; $i--) {
+                $date = now()->subWeeks($i);
+                $start = $date->copy()->startOfWeek();
+                $end = $date->copy()->endOfWeek();
+                
+                $labels[] = 'Sem ' . $date->format('W') . ' (' . $start->format('d/m') . ')';
+                
+                $createdData[] = WorkOrder::whereBetween('created_at', [$start, $end])->count();
+                $completedData[] = WorkOrder::whereBetween('created_at', [$start, $end])->whereIn('status', ['completed', 'delivered'])->count();
+                $earningsData[] = (float) WorkOrder::whereBetween('created_at', [$start, $end])->whereIn('status', ['completed', 'delivered'])->sum('total_price');
+            }
+        } else {
+            for ($i = 5; $i >= 0; $i--) {
+                $date = now()->subMonths($i);
+                $start = $date->copy()->startOfMonth();
+                $end = $date->copy()->endOfMonth();
+                
+                $labels[] = ucfirst($date->locale('es')->shortMonthName) . ' ' . $date->format('y');
+                
+                $createdData[] = WorkOrder::whereBetween('created_at', [$start, $end])->count();
+                $completedData[] = WorkOrder::whereBetween('created_at', [$start, $end])->whereIn('status', ['completed', 'delivered'])->count();
+                $earningsData[] = (float) WorkOrder::whereBetween('created_at', [$start, $end])->whereIn('status', ['completed', 'delivered'])->sum('total_price');
+            }
+        }
+
+        return [
+            'labels' => $labels,
+            'created' => $createdData,
+            'completed' => $completedData,
+            'earnings' => $earningsData,
+        ];
+    }
+
     public function render()
     {
         $terminalStatuses = ['completed', 'delivered', 'cancelled'];
@@ -98,6 +149,7 @@ class AdminDashboard extends Component
         $totalOrders = WorkOrder::count();
         $inProgress  = WorkOrder::where('status', 'in_progress')->count();
         $completed   = WorkOrder::where('status', 'completed')->count();
+        $totalEarnings = WorkOrder::whereIn('status', ['completed', 'delivered'])->sum('total_price');
         
         $delayedOrders = WorkOrder::whereNotIn('status', $terminalStatuses)
             ->whereNotNull('delivery_date')
@@ -132,11 +184,13 @@ class AdminDashboard extends Component
             'totalOrders'       => $totalOrders,
             'inProgress'        => $inProgress,
             'completed'         => $completed,
+            'totalEarnings'     => $totalEarnings,
             'delayedOrders'     => $delayedOrders,
             'urgentOrders'      => $urgentOrders,
             'bottlenecks'       => $bottlenecks,
             'prostheticDist'    => $prostheticDist,
             'calendarEvents'    => $this->calendarEvents,
+            'initialChartData'  => $this->getChartData(),
             'recentLogs'        => TraceabilityLog::with(['workOrder', 'performer', 'fromArea', 'toArea'])
                                     ->latest()->take(10)->get(),
             'globalHistoryItems' => WorkOrderArea::with(['workOrder', 'area', 'assignedUser'])
