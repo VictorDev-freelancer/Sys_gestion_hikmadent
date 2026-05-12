@@ -212,7 +212,6 @@
     </div>
 
     {{-- SCRIPTS DE CHART.JS CON MÁXIMA REACTIVIDAD DE EVENTOS NATIVOS Y SOPORTE DE LIVEWIRE NAVIGATE --}}
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // Usar livewire:navigated para inicializar de forma segura y reactiva bajo cualquier navegación wire:navigate
         document.addEventListener('livewire:navigated', () => {

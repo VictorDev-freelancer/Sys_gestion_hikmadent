@@ -57,9 +57,15 @@ class ReportExportService
             fputcsv($file, [
                 'Codigo OT',
                 'Paciente',
-                'Doctor',
+                'Cliente / Doctor',
+                'Tipo Cliente',
+                'Trabajo Catálogo / Servicio',
+                'Precio Base Unitario (S/.)',
+                'Trabajos Extras (Detalle)',
+                'Monto Extras (S/.)',
+                'Monto Total (S/.)',
+                'Doctor (Ficha)',
                 'Consultorio',
-                'Tipo Trabajo',
                 'Estado Actual',
                 'Area Actual',
                 'Prioridad',
@@ -89,13 +95,31 @@ class ReportExportService
                         $isDelayed = 'Sí';
                     }
 
+                    // Trabajos Extras y Precios
+                    $extrasPriceSum = 0;
+                    $extrasDescription = '';
+                    if (!empty($order->extra_works)) {
+                        $extrasPriceSum = collect($order->extra_works)->sum('price');
+                        $extrasDescription = collect($order->extra_works)->pluck('description')->join(', ');
+                    }
+
+                    $clientName = $order->client ? $order->client->name : 'N/A';
+                    $clientTypeLabel = ($order->client_type === 'student') ? 'Estudiante' : 'Odontólogo/Clínica';
+                    $catalogItemName = $order->catalogItem ? $order->catalogItem->name : 'N/A';
+
                     // Carga (Load) de registro en el flujo
                     fputcsv($file, [
                         $order->code,
                         $order->patient_name,
+                        $clientName,
+                        $clientTypeLabel,
+                        $catalogItemName,
+                        (float) $order->unit_price,
+                        $extrasDescription ?: 'Ninguno',
+                        (float) $extrasPriceSum,
+                        (float) $order->total_price,
                         $order->doctor_name,
                         $order->clinic_name ?? 'N/A',
-                        $order->prosthetic_type->label(),
                         $order->status->label(),
                         $order->currentArea ? $order->currentArea->name : 'No Asignada',
                         $order->priority->label(),
